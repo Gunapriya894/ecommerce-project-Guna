@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GU Commerce — Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #050810;
+      --panel: #0b0f1a;
+      --panel2: #0f1420;
+      --border: #1a2540;
+      --accent: #00f5d4;
+      --accent2: #f72585;
+      --accent3: #4cc9f0;
+      --text: #c8d6f0;
+      --muted: #4a5a7a;
+      --success: #06d6a0;
+      --error: #ef233c;
+      --glow: 0 0 20px rgba(0,245,212,0.3);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Grid background */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,245,212,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,245,212,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* Scanlines */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px
+      );
+      pointer-events: none; z-index: 0;
+    }
+
+    /* Glow orbs */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 {
+      width: 400px; height: 400px;
+      background: rgba(0,245,212,0.06);
+      top: -100px; left: -100px;
+    }
+    .orb-2 {
+      width: 300px; height: 300px;
+      background: rgba(247,37,133,0.05);
+      bottom: -80px; right: -80px;
+    }
+
+    /* Corner decorations */
+    .corner {
+      position: fixed;
+      width: 80px; height: 80px;
+      pointer-events: none; z-index: 1;
+    }
+    .c-tl { top: 0; left: 0;
+      border-top: 1px solid rgba(0,245,212,0.2);
+      border-right: 1px solid rgba(0,245,212,0.2); }
+    .c-br { bottom: 0; right: 0;
+      border-bottom: 1px solid rgba(0,245,212,0.2);
+      border-left: 1px solid rgba(0,245,212,0.2); }
+    .c-tr { top: 0; right: 0;
+      border-top: 1px solid rgba(247,37,133,0.1);
+      border-left: 1px solid rgba(247,37,133,0.1); }
+    .c-bl { bottom: 0; left: 0;
+      border-bottom: 1px solid rgba(247,37,133,0.1);
+      border-right: 1px solid rgba(247,37,133,0.1); }
+
+    /* ── Main Card ── */
+    .auth-card {
+      position: relative; z-index: 2;
+      width: 100%; max-width: 440px;
+      margin: 1.5rem;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      animation: cardIn 0.5s ease forwards;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Top accent bar */
+    .auth-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent3), var(--accent2));
+    }
+
+    /* ── Header ── */
+    .card-header {
+      padding: 2rem 2rem 1.5rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: 1rem;
+      letter-spacing: 4px;
+      color: var(--accent);
+      text-shadow: var(--glow);
+      margin-bottom: 1.5rem;
+      display: block;
+    }
+
+    /* Tab switcher */
+    .tabs {
+      display: flex;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: var(--panel2);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab.active {
+      color: var(--bg);
+      background: var(--accent);
+    }
+
+    .tab:not(.active):hover {
+      color: var(--accent);
+      background: rgba(0,245,212,0.05);
+    }
+
+    /* ── Form Body ── */
+    .card-body { padding: 2rem; }
+
+    .form-section {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .form-section.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-eyebrow {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 3px;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .form-eyebrow::before { content: '▸'; }
+
+    /* Fields */
+    .field {
+      margin-bottom: 1.2rem;
+    }
+
+    .field label {
+      display: block;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .field-wrap {
+      position: relative;
+    }
+
+    .field-wrap .field-icon {
+      position: absolute;
+      left: 12px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.9rem;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 11px 14px 11px 36px;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .field input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(0,245,212,0.08);
+    }
+
+    .field input::placeholder { color: var(--muted); }
+
+    /* Password toggle */
+    .pwd-toggle {
+      position: absolute;
+      right: 10px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      color: var(--muted); cursor: pointer;
+      font-size: 0.8rem; padding: 4px;
+      transition: color 0.15s;
+    }
+    .pwd-toggle:hover { color: var(--accent); }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%;
+      padding: 13px;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.78rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: box-shadow 0.2s, transform 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+
+    .btn-submit:hover {
+      box-shadow: 0 0 24px rgba(0,245,212,0.5);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5; cursor: not-allowed;
+      transform: none; box-shadow: none;
+    }
+
+    /* Spinner inside button */
+    .btn-spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(5,8,16,0.3);
+      border-top-color: var(--bg);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: none;
+    }
+
+    .btn-submit.loading .btn-spinner { display: block; }
+    .btn-submit.loading .btn-text { display: none; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Message area */
+    .msg {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      padding: 10px 14px;
+      border-left: 3px solid;
+      margin-top: 1rem;
+      display: none;
+      line-height: 1.5;
+    }
+    .msg.ok  { border-color: var(--success); color: var(--success); background: rgba(6,214,160,0.06); display: block; }
+    .msg.err { border-color: var(--error);   color: var(--error);   background: rgba(239,35,60,0.06);  display: block; }
+
+    /* Password strength bar */
+    .pwd-strength {
+      margin-top: 6px;
+      display: none;
+    }
+
+    .pwd-strength.visible { display: block; }
+
+    .strength-bar {
+      height: 2px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+
+    .strength-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.3s, background 0.3s;
+    }
+
+    .strength-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+
+    /* ── Footer ── */
+    .card-footer {
+      padding: 1rem 2rem 1.5rem;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-note {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 1px;
+      line-height: 1.6;
+    }
+
+    /* ── Success overlay ── */
+    .success-overlay {
+      position: absolute; inset: 0;
+      background: var(--panel);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 2rem;
+      z-index: 10;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .success-overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .success-icon {
+      font-size: 2.5rem; margin-bottom: 1rem;
+    }
+
+    .success-title {
+      font-family: 'Orbitron', monospace; font-weight: 700;
+      font-size: 1.1rem; color: var(--accent);
+      margin-bottom: 0.5rem; letter-spacing: 2px;
+    }
+
+    .success-sub {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem; color: var(--muted);
+      letter-spacing: 1px; margin-bottom: 0.3rem;
+    }
+
+    .redirect-bar {
+      width: 100%; height: 2px;
+      background: var(--border);
+      margin-top: 1.5rem; border-radius: 2px; overflow: hidden;
+    }
+
+    .redirect-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent3));
+      border-radius: 2px;
+      animation: fillBar 2s linear forwards;
+    }
+
+    @keyframes fillBar {
+      from { width: 0%; }
+      to   { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="corner c-tl"></div>
+  <div class="corner c-br"></div>
+  <div class="corner c-tr"></div>
+  <div class="corner c-bl"></div>
+
+  <div class="auth-card" id="authCard">
+
+    <!-- Success Overlay -->
+    <div class="success-overlay" id="successOverlay">
+      <div class="success-icon">✦</div>
+      <div class="success-title" id="successTitle">ACCESS GRANTED</div>
+      <div class="success-sub" id="successUser"></div>
+      <div class="success-sub">Redirecting to dashboard...</div>
+      <div class="redirect-bar"><div class="redirect-fill"></div></div>
+    </div>
+
+    <!-- Header -->
+    <div class="card-header">
+      <span class="logo">GU::COMMERCE</span>
+      <div class="tabs">
+        <button class="tab active" id="tabLogin" onclick="switchTab('login')">Login</button>
+        <button class="tab" id="tabSignup" onclick="switchTab('signup')">Sign Up</button>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="card-body">
+
+      <!-- LOGIN FORM -->
+      <div class="form-section active" id="loginSection">
+        <div class="form-eyebrow">System Authentication</div>
+
+        <div class="field">
+          <label>Username</label>
+          <div class="field-wrap">
+            <span class="field-icon">◈</span>
+            <input type="text" id="loginUser" placeholder="your_username"
+              autocomplete="username"
+              onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()"/>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Password</label>
+          <div class="field-wrap">
+            <span class="field-icon">◉</span>
+            <input type="password" id="loginPass" placeholder="••••••••"
+              autocomplete="current-password"
+              onkeydown="if(event.key==='Enter')doLogin()"/>
+            <button class="pwd-toggle" type="button" onclick="togglePwd('loginPass',this)">👁</button>
+          </div>
+        </div>
+
+        <button class="btn-submit" id="loginBtn" onclick="doLogin()">
+          <div class="btn-spinner"></div>
+          <span class="btn-text">▸ Login</span>
+        </button>
+
+        <div class="msg" id="loginMsg"></div>
+      </div>
+
+      <!-- SIGNUP FORM -->
+      <div class="form-section" id="signupSection">
+        <div class="form-eyebrow">Create Account</div>
+
+        <div class="field">
+          <label>Username</label>
+          <div class="field-wrap">
+            <span class="field-icon">◈</span>
+            <input type="text" id="signupUser" placeholder="choose_a_username"
+              autocomplete="username"
+              onkeydown="if(event.key==='Enter')document.getElementById('signupEmail').focus()"/>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Email</label>
+          <div class="field-wrap">
+            <span class="field-icon">@</span>
+            <input type="email" id="signupEmail" placeholder="you@example.com"
+              autocomplete="email"
+              onkeydown="if(event.key==='Enter')document.getElementById('signupPass').focus()"/>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Password</label>
+          <div class="field-wrap">
+            <span class="field-icon">◉</span>
+            <input type="password" id="signupPass" placeholder="min. 6 characters"
+              autocomplete="new-password"
+              oninput="checkStrength(this.value)"
+              onkeydown="if(event.key==='Enter')doSignup()"/>
+            <button class="pwd-toggle" type="button" onclick="togglePwd('signupPass',this)">👁</button>
+          </div>
+          <div class="pwd-strength" id="pwdStrength">
+            <div class="strength-bar">
+              <div class="strength-fill" id="strengthFill"></div>
+            </div>
+            <div class="strength-label" id="strengthLabel"></div>
+          </div>
+        </div>
+
+        <button class="btn-submit" id="signupBtn" onclick="doSignup()">
+          <div class="btn-spinner"></div>
+          <span class="btn-text">▸ Create Account</span>
+        </button>
+
+        <div class="msg" id="signupMsg"></div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="card-footer">
+      <div class="footer-note">
+        GU::COMMERCE · SECURE ACCESS PORTAL<br/>
+        Passwords are hashed · Sessions expire in 24h
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ── CONFIG — update after terraform apply ──────────────────────────────────
+    // Replace with your actual API Gateway URL from terraform output
+    const BASE_URL   = "https://s15c9rh1dc.execute-api.ap-southeast-1.amazonaws.com/dev";
+    const SIGNUP_URL = BASE_URL + "/guauth/signup";
+    const LOGIN_URL  = BASE_URL + "/guauth/login";
+    const LOGOUT_URL = BASE_URL + "/guauth/logout";
+    // ──────────────────────────────────────────────────────────────────────────
+
+    // If already logged in, redirect immediately
+    (function checkExisting() {
+      const token = localStorage.getItem('gu_token');
+      if (token) window.location.href = 'index.html';
+    })();
+
+    // ── Tab switch ─────────────────────────────────────────────────────────────
+    function switchTab(tab) {
+      document.getElementById('loginSection').classList.toggle('active', tab === 'login');
+      document.getElementById('signupSection').classList.toggle('active', tab === 'signup');
+      document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+      document.getElementById('tabSignup').classList.toggle('active', tab === 'signup');
+      document.getElementById('loginMsg').className = 'msg';
+      document.getElementById('signupMsg').className = 'msg';
+    }
+
+    // ── Password visibility ────────────────────────────────────────────────────
+    function togglePwd(inputId, btn) {
+      const inp = document.getElementById(inputId);
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+    }
+
+    // ── Password strength ──────────────────────────────────────────────────────
+    function checkStrength(val) {
+      const el = document.getElementById('pwdStrength');
+      const fill = document.getElementById('strengthFill');
+      const label = document.getElementById('strengthLabel');
+
+      if (!val) { el.classList.remove('visible'); return; }
+      el.classList.add('visible');
+
+      let score = 0;
+      if (val.length >= 6)  score++;
+      if (val.length >= 10) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+
+      const levels = [
+        { pct: '20%', color: '#ef233c', text: 'WEAK' },
+        { pct: '40%', color: '#f48c06', text: 'FAIR' },
+        { pct: '60%', color: '#f4d35e', text: 'MODERATE' },
+        { pct: '80%', color: '#80b918', text: 'STRONG' },
+        { pct: '100%', color: '#06d6a0', text: 'VERY STRONG' },
+      ];
+
+      const lvl = levels[Math.min(score - 1, 4)] || levels[0];
+      fill.style.width = lvl.pct;
+      fill.style.background = lvl.color;
+      label.textContent = lvl.text;
+      label.style.color = lvl.color;
+    }
+
+    // ── Message helper ─────────────────────────────────────────────────────────
+    function setMsg(id, text, type) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = 'msg ' + type;
+    }
+
+    function setLoading(btnId, loading) {
+      const btn = document.getElementById(btnId);
+      btn.disabled = loading;
+      btn.classList.toggle('loading', loading);
+    }
+
+    // ── Success overlay ────────────────────────────────────────────────────────
+    function showSuccess(title, username, redirectTo) {
+      document.getElementById('successTitle').textContent = title;
+      document.getElementById('successUser').textContent = '◈ ' + username.toUpperCase();
+      document.getElementById('successOverlay').classList.add('show');
+      setTimeout(() => { window.location.href = redirectTo; }, 2200);
+    }
+
+    // ── Save session ───────────────────────────────────────────────────────────
+    function saveSession(token, username, email) {
+      localStorage.setItem('gu_token',    token);
+      localStorage.setItem('gu_username', username);
+      localStorage.setItem('gu_email',    email || '');
+    }
+
+    // ── Login ──────────────────────────────────────────────────────────────────
+    async function doLogin() {
+      const username = document.getElementById('loginUser').value.trim();
+      const password = document.getElementById('loginPass').value;
+
+      if (!username || !password) {
+        setMsg('loginMsg', '⚠ Please enter your username and password', 'err');
+        return;
+      }
+
+      setLoading('loginBtn', true);
+      setMsg('loginMsg', '', '');
+
+      try {
+        const res = await fetch(LOGIN_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setMsg('loginMsg', '✕ ' + (data.error || 'Login failed'), 'err');
+          return;
+        }
+
+        saveSession(data.token, data.username, data.email);
+        showSuccess('ACCESS GRANTED', data.username, 'index.html');
+
+      } catch(e) {
+        setMsg('loginMsg', '✕ Network error — check your connection', 'err');
+      } finally {
+        setLoading('loginBtn', false);
+      }
+    }
+
+    // ── Signup ─────────────────────────────────────────────────────────────────
+    async function doSignup() {
+      const username = document.getElementById('signupUser').value.trim();
+      const email    = document.getElementById('signupEmail').value.trim();
+      const password = document.getElementById('signupPass').value;
+
+      if (!username || !email || !password) {
+        setMsg('signupMsg', '⚠ All fields are required', 'err');
+        return;
+      }
+
+      if (password.length < 6) {
+        setMsg('signupMsg', '⚠ Password must be at least 6 characters', 'err');
+        return;
+      }
+
+      setLoading('signupBtn', true);
+      setMsg('signupMsg', '', '');
+
+      try {
+        const res = await fetch(SIGNUP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setMsg('signupMsg', '✕ ' + (data.error || 'Signup failed'), 'err');
+          return;
+        }
+
+        saveSession(data.token, data.username, data.email);
+        showSuccess('ACCOUNT CREATED', data.username, 'index.html');
+
+      } catch(e) {
+        setMsg('signupMsg', '✕ Network error — check your connection', 'err');
+      } finally {
+        setLoading('signupBtn', false);
+      }
+    }
+  </script>
+</body>
+</html>

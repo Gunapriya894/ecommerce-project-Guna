@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GU Commerce — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #050810;
+      --panel: #0b0f1a;
+      --border: #1a2540;
+      --accent: #00f5d4;
+      --accent2: #f72585;
+      --accent3: #4cc9f0;
+      --text: #c8d6f0;
+      --muted: #4a5a7a;
+      --glow: 0 0 18px rgba(0,245,212,0.35);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      /* Hidden until auth check passes */
+      visibility: hidden;
+    }
+
+    body.auth-ready { visibility: visible; }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,245,212,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,245,212,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none; z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none; z-index: 0;
+    }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 3rem; height: 64px;
+      background: rgba(5,8,16,0.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'Orbitron', monospace; font-weight: 900;
+      font-size: 1.05rem; letter-spacing: 4px;
+      color: var(--accent); text-shadow: var(--glow);
+    }
+
+    .nav-links { display: flex; gap: 2rem; }
+    .nav-links a {
+      font-family: 'Share Tech Mono', monospace; font-size: 0.75rem;
+      color: var(--muted); text-decoration: none;
+      letter-spacing: 2px; text-transform: uppercase; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* ── User Session Block ── */
+    .nav-right {
+      display: flex; align-items: center; gap: 1.2rem;
+    }
+
+    .user-chip {
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.68rem; color: var(--muted);
+      padding: 5px 12px;
+      border: 1px solid var(--border);
+      background: rgba(11,15,26,0.8);
+    }
+
+    .user-chip .user-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 6px var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .user-chip .username { color: var(--accent); }
+
+    .btn-logout {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); background: transparent;
+      border: 1px solid rgba(74,90,122,0.4);
+      padding: 5px 12px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-logout:hover {
+      color: var(--accent2);
+      border-color: rgba(247,37,133,0.4);
+    }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .hero {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 80px 2rem 0;
+    }
+
+    .hero-badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.68rem; letter-spacing: 4px;
+      color: var(--accent); text-transform: uppercase;
+      margin-bottom: 1.5rem; opacity: 0;
+      animation: fadeUp 0.6s 0.2s forwards;
+    }
+    .hero-badge span {
+      display: inline-block; padding: 5px 16px;
+      border: 1px solid rgba(0,245,212,0.3);
+      background: rgba(0,245,212,0.05);
+    }
+
+    .hero-title {
+      font-family: 'Orbitron', monospace; font-weight: 900;
+      font-size: clamp(3rem, 9vw, 7rem); line-height: 0.95;
+      margin-bottom: 1.2rem; opacity: 0;
+      animation: fadeUp 0.6s 0.35s forwards;
+    }
+    .hero-title .line1 { color: #fff; display: block; }
+    .hero-title .line2 {
+      display: block;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-welcome {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem; letter-spacing: 3px;
+      color: var(--accent); text-transform: uppercase;
+      margin-bottom: 0.8rem; opacity: 0;
+      animation: fadeUp 0.6s 0.28s forwards;
+    }
+
+    .hero-sub {
+      font-size: 1.1rem; font-weight: 300; color: var(--muted);
+      max-width: 460px; margin: 0 auto 3rem; line-height: 1.7;
+      opacity: 0; animation: fadeUp 0.6s 0.5s forwards;
+    }
+
+    .hero-btns {
+      display: flex; gap: 1rem;
+      opacity: 0; animation: fadeUp 0.6s 0.65s forwards;
+      margin-bottom: 5rem;
+    }
+
+    .btn-primary {
+      font-family: 'Share Tech Mono', monospace; font-size: 0.78rem;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--bg); background: var(--accent);
+      border: none; padding: 12px 28px; cursor: pointer;
+      text-decoration: none; transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .btn-primary:hover { box-shadow: 0 0 24px rgba(0,245,212,0.5); transform: translateY(-2px); }
+
+    .btn-ghost {
+      font-family: 'Share Tech Mono', monospace; font-size: 0.78rem;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--accent); background: transparent;
+      border: 1px solid rgba(0,245,212,0.4); padding: 12px 28px;
+      cursor: pointer; text-decoration: none; transition: background 0.2s, transform 0.2s;
+    }
+    .btn-ghost:hover { background: rgba(0,245,212,0.08); transform: translateY(-2px); }
+
+    .cards-section { position: relative; z-index: 1; padding: 0 2rem 6rem; }
+
+    .section-label {
+      font-family: 'Share Tech Mono', monospace; font-size: 0.65rem;
+      letter-spacing: 4px; color: var(--muted);
+      text-align: center; text-transform: uppercase;
+      margin-bottom: 2.5rem;
+    }
+
+    .cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 1.5rem; max-width: 1080px; margin: 0 auto;
+    }
+
+    .card {
+      position: relative; background: var(--panel); border: 1px solid var(--border);
+      padding: 2.2rem 2rem 2rem; cursor: pointer;
+      text-decoration: none; display: block; overflow: hidden;
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .card::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--c) 0%, transparent 55%);
+      opacity: 0; transition: opacity 0.3s;
+    }
+
+    .card:hover { transform: translateY(-6px); border-color: var(--c); box-shadow: 0 8px 40px rgba(0,0,0,0.4); }
+    .card:hover::before { opacity: 0.07; }
+
+    .card[data-c="teal"] { --c: var(--accent); }
+    .card[data-c="pink"] { --c: var(--accent2); }
+    .card[data-c="blue"] { --c: var(--accent3); }
+
+    .card-corner {
+      position: absolute; top: 0; right: 0;
+      width: 36px; height: 36px;
+      border-bottom: 1px solid var(--c); border-left: 1px solid var(--c);
+      opacity: 0.4;
+    }
+
+    .card-icon { font-size: 2rem; margin-bottom: 1rem; }
+    .card-id { font-family: 'Share Tech Mono', monospace; font-size: 0.63rem; letter-spacing: 3px; color: var(--c); margin-bottom: 0.5rem; text-transform: uppercase; }
+    .card-title { font-family: 'Orbitron', monospace; font-weight: 700; font-size: 1.3rem; color: #fff; margin-bottom: 0.8rem; }
+    .card-desc { font-size: 0.9rem; color: var(--muted); line-height: 1.7; margin-bottom: 1.8rem; }
+    .card-cta { display: inline-flex; align-items: center; gap: 8px; font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: var(--c); transition: gap 0.2s; }
+    .card:hover .card-cta { gap: 14px; }
+    .card-cta::after { content: '→'; }
+
+    .stats-bar {
+      position: relative; z-index: 1;
+      display: flex; justify-content: center; flex-wrap: wrap;
+      gap: 4rem; padding: 2.5rem 2rem;
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      background: rgba(11,15,26,0.7);
+    }
+
+    .stat { text-align: center; }
+    .stat-val { font-family: 'Orbitron', monospace; font-size: 2rem; font-weight: 700; color: var(--accent); text-shadow: var(--glow); }
+    .stat-label { font-family: 'Share Tech Mono', monospace; font-size: 0.63rem; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+    footer {
+      position: relative; z-index: 1; text-align: center; padding: 2rem;
+      font-family: 'Share Tech Mono', monospace; font-size: 0.68rem;
+      color: var(--muted); letter-spacing: 2px; border-top: 1px solid var(--border);
+    }
+
+    .corner-tl, .corner-br {
+      position: fixed; width: 70px; height: 70px; pointer-events: none; z-index: 50;
+    }
+    .corner-tl { top: 70px; left: 0; border-top: 1px solid rgba(0,245,212,0.15); border-right: 1px solid rgba(0,245,212,0.15); }
+    .corner-br { bottom: 0; right: 0; border-bottom: 1px solid rgba(0,245,212,0.15); border-left: 1px solid rgba(0,245,212,0.15); }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+  </style>
+</head>
+<body>
+
+  <div class="corner-tl"></div>
+  <div class="corner-br"></div>
+
+  <nav>
+    <div class="nav-logo">GU::COMMERCE</div>
+    <div class="nav-links">
+      <a href="product.html">Products</a>
+      <a href="cart.html">Cart</a>
+      <a href="recommendation.html">Recs</a>
+    </div>
+    <div class="nav-right">
+      <div class="user-chip">
+        <div class="user-dot"></div>
+        <span class="username" id="navUsername">—</span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">⏻ Logout</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-welcome" id="welcomeMsg"></div>
+    <div class="hero-badge"><span>▸ AWS LAMBDA · DYNAMODB · TERRAFORM · AP-SOUTHEAST-1</span></div>
+    <h1 class="hero-title">
+      <span class="line1">COMMERCE</span>
+      <span class="line2">DASHBOARD</span>
+    </h1>
+    <p class="hero-sub">
+      Microservices command center for product catalog,
+      shopping cart, and AI-powered recommendations — 
+      serverless, scalable, production-ready.
+    </p>
+    <div class="hero-btns">
+      <a href="product.html" class="btn-primary">Launch Products</a>
+      <a href="cart.html" class="btn-ghost">View Cart</a>
+    </div>
+  </section>
+
+  <div class="cards-section">
+    <div class="section-label">— Select a service module —</div>
+    <div class="cards">
+
+      <a href="product.html" class="card" data-c="teal">
+        <div class="card-corner"></div>
+        <div class="card-icon">📦</div>
+        <div class="card-id">SVC-001 · PRODUCT SERVICE</div>
+        <div class="card-title">Products</div>
+        <p class="card-desc">Browse the catalog, add new items with name, price, and stock. All data persisted to the product DynamoDB table via Lambda.</p>
+        <div class="card-cta">Enter Module</div>
+      </a>
+
+      <a href="cart.html" class="card" data-c="pink">
+        <div class="card-corner"></div>
+        <div class="card-icon">🛒</div>
+        <div class="card-id">SVC-002 · CART SERVICE</div>
+        <div class="card-title">Cart</div>
+        <p class="card-desc">View all active carts per user, inspect item lists and quantities stored in the cart DynamoDB table via Lambda.</p>
+        <div class="card-cta">Enter Module</div>
+      </a>
+
+      <a href="recommendation.html" class="card" data-c="blue">
+        <div class="card-corner"></div>
+        <div class="card-icon">✦</div>
+        <div class="card-id">SVC-003 · RECOMMENDATION ENGINE</div>
+        <div class="card-title">Recommendations</div>
+        <p class="card-desc">Get personalised product suggestions for any user ID, derived from their current cart contents using the recommendation Lambda.</p>
+        <div class="card-cta">Enter Module</div>
+      </a>
+
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-val">3</div><div class="stat-label">Microservices</div></div>
+    <div class="stat"><div class="stat-val">λ</div><div class="stat-label">Lambda Powered</div></div>
+    <div class="stat"><div class="stat-val">∞</div><div class="stat-label">Auto Scaling</div></div>
+    <div class="stat"><div class="stat-val">IaC</div><div class="stat-label">Terraform Built</div></div>
+  </div>
+
+  <footer>GU::COMMERCE DASHBOARD · AWS LAMBDA + DYNAMODB · TERRAFORM · AP-SOUTHEAST-1</footer>
+
+  <script>
+    // ── Auth config — update after terraform apply ─────────────────────────────
+    const AUTH_BASE   = "https://s15c9rh1dc.execute-api.ap-southeast-1.amazonaws.com/dev";
+    const LOGOUT_URL  = AUTH_BASE + "/guauth/logout";
+    // ──────────────────────────────────────────────────────────────────────────
+
+    // ── Auth Guard ─────────────────────────────────────────────────────────────
+    (async function authGuard() {
+      const token    = localStorage.getItem('gu_token');
+      const username = localStorage.getItem('gu_username');
+
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // Show page immediately with stored username (optimistic)
+      document.getElementById('navUsername').textContent = username || '—';
+      document.getElementById('welcomeMsg').textContent  = '◈ Welcome back, ' + (username || 'user').toUpperCase();
+      document.body.classList.add('auth-ready');
+    })();
+
+    // ── Logout ─────────────────────────────────────────────────────────────────
+    async function doLogout() {
+      const token = localStorage.getItem('gu_token');
+      try {
+        await fetch(LOGOUT_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          }
+        });
+      } catch(e) { /* ignore network errors on logout */ }
+
+      localStorage.removeItem('gu_token');
+      localStorage.removeItem('gu_username');
+      localStorage.removeItem('gu_email');
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>

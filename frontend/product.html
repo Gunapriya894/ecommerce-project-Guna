@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GU Commerce — Products</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #050810;
+      --panel: #0b0f1a;
+      --panel2: #0f1420;
+      --border: #1a2540;
+      --accent: #00f5d4;
+      --accent2: #f72585;
+      --text: #c8d6f0;
+      --muted: #4a5a7a;
+      --success: #06d6a0;
+      --error: #ef233c;
+    }
+
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Rajdhani', sans-serif; min-height: 100vh;
+      visibility: hidden;
+    }
+
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,245,212,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,245,212,0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none; z-index: 0;
+    }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2.5rem; height: 60px;
+      background: rgba(5,8,16,0.95); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'Orbitron', monospace; font-weight: 900;
+      font-size: 0.95rem; letter-spacing: 4px; color: var(--accent);
+      text-decoration: none;
+    }
+
+    .nav-links { display: flex; gap: 2rem; }
+    .nav-links a {
+      font-family: 'Share Tech Mono', monospace; font-size: 0.72rem;
+      color: var(--muted); text-decoration: none;
+      letter-spacing: 2px; text-transform: uppercase; transition: color 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+
+    .user-chip {
+      display: flex; align-items: center; gap: 7px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem; color: var(--muted);
+      padding: 4px 10px; border: 1px solid var(--border);
+    }
+
+    .user-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 6px var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .user-chip #navUsername { color: var(--accent); }
+
+    .btn-logout {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.62rem; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); background: transparent;
+      border: 1px solid rgba(74,90,122,0.4);
+      padding: 4px 10px; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-logout:hover { color: var(--accent2); border-color: rgba(247,37,133,0.4); }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .container {
+      position: relative; z-index: 1;
+      max-width: 1100px; margin: 0 auto;
+      padding: 80px 2rem 4rem;
+    }
+
+    .page-header {
+      display: flex; align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 2.5rem; padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .page-eyebrow {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 3px;
+      color: var(--accent); text-transform: uppercase; margin-bottom: 0.4rem;
+    }
+
+    .page-title {
+      font-family: 'Orbitron', monospace; font-weight: 700;
+      font-size: 2rem; color: #fff;
+    }
+
+    .action-bar { display: flex; gap: 1rem; align-items: center; }
+
+    .btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.73rem; letter-spacing: 2px; text-transform: uppercase;
+      padding: 10px 22px; border: none; cursor: pointer;
+      transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+    }
+
+    .btn-teal { background: var(--accent); color: var(--bg); }
+    .btn-teal:hover { box-shadow: 0 0 20px rgba(0,245,212,0.45); transform: translateY(-1px); }
+
+    .btn-outline {
+      background: transparent; color: var(--accent);
+      border: 1px solid rgba(0,245,212,0.4);
+    }
+    .btn-outline:hover { background: rgba(0,245,212,0.07); transform: translateY(-1px); }
+
+    .btn-pink {
+      background: transparent; color: var(--accent2);
+      border: 1px solid rgba(247,37,133,0.4); font-size: 0.68rem; padding: 7px 14px;
+    }
+    .btn-pink:hover { background: rgba(247,37,133,0.08); }
+
+    .btn-sm { padding: 7px 14px; font-size: 0.68rem; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .form-panel {
+      background: var(--panel); border: 1px solid var(--border);
+      padding: 2rem; margin-bottom: 2.5rem;
+      display: none; animation: slideDown 0.3s ease;
+    }
+    .form-panel.open { display: block; }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-title {
+      font-family: 'Orbitron', monospace; font-size: 0.9rem;
+      color: var(--accent); letter-spacing: 2px;
+      margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;
+    }
+    .form-title::before { content: '▸'; }
+
+    .form-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem; margin-bottom: 1.5rem;
+    }
+
+    .field label {
+      display: block; font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 2px; color: var(--muted);
+      text-transform: uppercase; margin-bottom: 6px;
+    }
+
+    .field input {
+      width: 100%; padding: 10px 14px;
+      background: var(--panel2); border: 1px solid var(--border);
+      color: var(--text); font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem; outline: none; transition: border-color 0.2s;
+    }
+    .field input:focus { border-color: var(--accent); }
+
+    .msg {
+      font-family: 'Share Tech Mono', monospace; font-size: 0.75rem;
+      padding: 10px 16px; border-left: 3px solid;
+      margin-top: 1rem; display: none;
+    }
+    .msg.ok  { border-color: var(--success); color: var(--success); background: rgba(6,214,160,0.06); }
+    .msg.err { border-color: var(--error);   color: var(--error);   background: rgba(239,35,60,0.06); }
+    .msg.visible { display: block; }
+
+    .area-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.2rem;
+    }
+
+    .area-title {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.68rem; letter-spacing: 3px; color: var(--muted); text-transform: uppercase;
+    }
+
+    .product-count {
+      font-family: 'Share Tech Mono', monospace; font-size: 0.68rem;
+      color: var(--accent); background: rgba(0,245,212,0.08);
+      border: 1px solid rgba(0,245,212,0.2); padding: 3px 10px;
+    }
+
+    .state-box {
+      text-align: center; padding: 4rem 2rem;
+      border: 1px dashed var(--border); color: var(--muted);
+      font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; letter-spacing: 2px;
+    }
+
+    .spinner {
+      width: 32px; height: 32px; border: 2px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 0.7s linear infinite; margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .product-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .product-card {
+      background: var(--panel); border: 1px solid var(--border);
+      padding: 1.5rem; transition: border-color 0.2s, transform 0.2s;
+      position: relative; overflow: hidden;
+    }
+    .product-card:hover { border-color: rgba(0,245,212,0.3); transform: translateY(-3px); }
+    .product-card::after {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: linear-gradient(to bottom, var(--accent), transparent); opacity: 0.5;
+    }
+
+    .pc-id { font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 2px; margin-bottom: 0.6rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pc-name { font-family: 'Orbitron', monospace; font-weight: 700; font-size: 1rem; color: #fff; margin-bottom: 0.8rem; }
+    .pc-details { display: flex; gap: 1rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
+    .pc-badge { font-family: 'Share Tech Mono', monospace; font-size: 0.68rem; padding: 3px 10px; border: 1px solid; }
+    .pc-badge.price { border-color: rgba(0,245,212,0.3); color: var(--accent); }
+    .pc-badge.stock { border-color: rgba(74,90,122,0.5); color: var(--muted); }
+
+    .qty-picker { display: none; align-items: center; gap: 8px; margin-bottom: 0.8rem; }
+    .qty-picker.open { display: flex; }
+    .qty-label { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--muted); letter-spacing: 1px; }
+    .qty-ctrl { display: flex; align-items: center; border: 1px solid var(--border); }
+    .qty-ctrl button { width: 28px; height: 28px; background: var(--panel2); color: var(--text); border: none; cursor: pointer; font-size: 1rem; transition: background 0.15s; }
+    .qty-ctrl button:hover { background: rgba(0,245,212,0.1); }
+    .qty-ctrl span { width: 36px; text-align: center; font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; color: var(--accent); }
+
+    .user-row { display: flex; gap: 0.6rem; align-items: center; margin-top: 0.5rem; }
+    .user-row input { flex: 1; padding: 7px 10px; background: var(--panel2); border: 1px solid var(--border); color: var(--text); font-family: 'Share Tech Mono', monospace; font-size: 0.78rem; outline: none; }
+    .user-row input:focus { border-color: var(--accent); }
+    .user-row input::placeholder { color: var(--muted); }
+
+    .pc-msg { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; margin-top: 0.5rem; display: none; }
+    .pc-msg.ok  { color: var(--success); display: block; }
+    .pc-msg.err { color: var(--error);   display: block; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo">GU::COMMERCE</a>
+    <div class="nav-links">
+      <a href="product.html" class="active">Products</a>
+      <a href="cart.html">Cart</a>
+      <a href="recommendation.html">Recs</a>
+    </div>
+    <div class="nav-right">
+      <div class="user-chip">
+        <div class="user-dot"></div>
+        <span id="navUsername">—</span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">⏻ Logout</button>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <div class="page-header">
+      <div>
+        <div class="page-eyebrow">SVC-001 · PRODUCT SERVICE</div>
+        <div class="page-title">Product Catalog</div>
+      </div>
+      <div class="action-bar">
+        <button class="btn btn-outline" onclick="toggleForm()">＋ Add Product</button>
+        <button class="btn btn-teal" onclick="loadProducts()">↻ Load Products</button>
+      </div>
+    </div>
+
+    <div class="form-panel" id="addForm">
+      <div class="form-title">New Product Entry</div>
+      <div class="form-grid">
+        <div class="field"><label>Product ID</label><input id="pId" type="text" placeholder="e.g. PROD-001"/></div>
+        <div class="field"><label>Product Name</label><input id="pName" type="text" placeholder="e.g. Laptop Pro X"/></div>
+        <div class="field"><label>Price (₹)</label><input id="pPrice" type="number" placeholder="e.g. 75000"/></div>
+        <div class="field"><label>Stock</label><input id="pStock" type="number" placeholder="e.g. 50"/></div>
+      </div>
+      <div style="display:flex;gap:1rem;align-items:center;">
+        <button class="btn btn-teal" onclick="addProduct()">Add Product</button>
+        <button class="btn btn-outline" onclick="toggleForm()">Cancel</button>
+      </div>
+      <div class="msg" id="formMsg"></div>
+    </div>
+
+    <div class="products-area">
+      <div class="area-header">
+        <div class="area-title">— Catalog Items —</div>
+        <div class="product-count" id="countBadge" style="display:none"></div>
+      </div>
+      <div id="productsContainer">
+        <div class="state-box">Click <strong style="color:var(--accent)">LOAD PRODUCTS</strong> to fetch from DynamoDB</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const PRODUCT_URL = "https://s15c9rh1dc.execute-api.ap-southeast-1.amazonaws.com/dev/guproduct";
+    const CART_URL    = "https://s15c9rh1dc.execute-api.ap-southeast-1.amazonaws.com/dev/gucart";
+    const AUTH_BASE   = "https://s15c9rh1dc.execute-api.ap-southeast-1.amazonaws.com/dev";
+    const LOGOUT_URL  = AUTH_BASE + "/guauth/logout";
+
+    // ── Auth Guard ─────────────────────────────────────────────────────────────
+    (function authGuard() {
+      const token    = localStorage.getItem('gu_token');
+      const username = localStorage.getItem('gu_username');
+      if (!token) { window.location.href = 'login.html'; return; }
+      document.getElementById('navUsername').textContent = username || '—';
+      document.body.style.visibility = 'visible';
+    })();
+
+    async function doLogout() {
+      const token = localStorage.getItem('gu_token');
+      try {
+        await fetch(LOGOUT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+        });
+      } catch(e) {}
+      localStorage.removeItem('gu_token');
+      localStorage.removeItem('gu_username');
+      localStorage.removeItem('gu_email');
+      window.location.href = 'login.html';
+    }
+
+    // ── Product Functions ──────────────────────────────────────────────────────
+
+    function toggleForm() {
+      document.getElementById('addForm').classList.toggle('open');
+    }
+
+    function showMsg(id, text, type) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = 'msg ' + type + ' visible';
+      setTimeout(() => el.className = 'msg', 4000);
+    }
+
+    async function loadProducts() {
+      const container = document.getElementById('productsContainer');
+      const badge = document.getElementById('countBadge');
+      container.innerHTML = `<div class="state-box"><div class="spinner"></div>FETCHING FROM DYNAMODB...</div>`;
+      badge.style.display = 'none';
+
+      try {
+        const res = await fetch(PRODUCT_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const items = await res.json();
+
+        if (!items.length) {
+          container.innerHTML = `<div class="state-box">NO PRODUCTS FOUND — ADD ONE ABOVE</div>`;
+          return;
+        }
+
+        badge.textContent = items.length + ' ITEMS';
+        badge.style.display = 'block';
+        container.innerHTML = `<div class="product-grid" id="productGrid"></div>`;
+        const grid = document.getElementById('productGrid');
+        items.forEach(p => grid.appendChild(buildProductCard(p)));
+
+      } catch(e) {
+        container.innerHTML = `<div class="state-box" style="color:var(--error)">ERROR: ${e.message}</div>`;
+      }
+    }
+
+    function buildProductCard(p) {
+      const div = document.createElement('div');
+      div.className = 'product-card';
+      const id = p.id || '—';
+      const name = p.name || 'Unnamed';
+      const price = p.price != null ? '₹' + Number(p.price).toLocaleString('en-IN') : '—';
+      const stock = p.stock != null ? p.stock + ' units' : '—';
+      const safeId = id.replace(/[^a-zA-Z0-9]/g, '_');
+
+      // Pre-fill user ID from logged-in session
+      const loggedUser = localStorage.getItem('gu_username') || '';
+
+      div.innerHTML = `
+        <div class="pc-id">ID: ${id}</div>
+        <div class="pc-name">${name}</div>
+        <div class="pc-details">
+          <span class="pc-badge price">${price}</span>
+          <span class="pc-badge stock">${stock}</span>
+        </div>
+        <div class="qty-picker" id="qty_${safeId}">
+          <span class="qty-label">QTY:</span>
+          <div class="qty-ctrl">
+            <button onclick="changeQty('${safeId}',-1)">−</button>
+            <span id="qval_${safeId}">1</span>
+            <button onclick="changeQty('${safeId}',1)">＋</button>
+          </div>
+        </div>
+        <div class="user-row" id="userrow_${safeId}" style="display:none">
+          <input id="uid_${safeId}" placeholder="User ID" value="${loggedUser}"/>
+        </div>
+        <div style="margin-top:0.8rem;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" id="cartBtn_${safeId}"
+            onclick="openCartPicker('${safeId}','${name}',${p.price || 0})">
+            🛒 Add to Cart
+          </button>
+          <button class="btn btn-pink btn-sm" id="confirmBtn_${safeId}"
+            style="display:none"
+            onclick="addToCart('${safeId}','${name}',${p.price || 0})">
+            ✔ Confirm
+          </button>
+          <button class="btn btn-outline btn-sm" id="cancelBtn_${safeId}"
+            style="display:none"
+            onclick="cancelPicker('${safeId}')">
+            ✕
+          </button>
+        </div>
+        <div class="pc-msg" id="pcmsg_${safeId}"></div>
+      `;
+      return div;
+    }
+
+    function changeQty(id, delta) {
+      const el = document.getElementById('qval_' + id);
+      let v = parseInt(el.textContent) + delta;
+      if (v < 1) v = 1;
+      el.textContent = v;
+    }
+
+    function openCartPicker(id) {
+      document.getElementById('qty_' + id).classList.add('open');
+      document.getElementById('userrow_' + id).style.display = 'flex';
+      document.getElementById('confirmBtn_' + id).style.display = 'inline-flex';
+      document.getElementById('cancelBtn_' + id).style.display = 'inline-flex';
+      document.getElementById('cartBtn_' + id).style.display = 'none';
+    }
+
+    function cancelPicker(id) {
+      document.getElementById('qty_' + id).classList.remove('open');
+      document.getElementById('userrow_' + id).style.display = 'none';
+      document.getElementById('confirmBtn_' + id).style.display = 'none';
+      document.getElementById('cancelBtn_' + id).style.display = 'none';
+      document.getElementById('cartBtn_' + id).style.display = 'inline-flex';
+      const m = document.getElementById('pcmsg_' + id);
+      m.className = 'pc-msg'; m.textContent = '';
+    }
+
+    async function addToCart(id, name, price) {
+      const user = (document.getElementById('uid_' + id)?.value || '').trim();
+      const qty  = parseInt(document.getElementById('qval_' + id)?.textContent || '1');
+      const msg  = document.getElementById('pcmsg_' + id);
+
+      if (!user) { msg.textContent = '⚠ Enter a user ID'; msg.className = 'pc-msg err'; return; }
+
+      msg.className = 'pc-msg'; msg.textContent = 'Adding...';
+      msg.style.display = 'block'; msg.style.color = 'var(--muted)';
+
+      try {
+        const getRes = await fetch(CART_URL);
+        const allCarts = await getRes.json();
+        const existing = allCarts.find(c => c.user === user);
+        const currentItems = existing ? (existing.items || []) : [];
+
+        const idx = currentItems.findIndex(i => i.name === name);
+        if (idx >= 0) currentItems[idx].quantity = (currentItems[idx].quantity || 1) + qty;
+        else currentItems.push({ name, price, quantity: qty });
+
+        const postRes = await fetch(CART_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user, items: currentItems })
+        });
+
+        if (!postRes.ok) throw new Error(`HTTP ${postRes.status}`);
+        msg.textContent = `✔ Added ${qty}× ${name} for ${user}`;
+        msg.className = 'pc-msg ok';
+        setTimeout(() => cancelPicker(id), 2200);
+
+      } catch(e) {
+        msg.textContent = '✕ ' + e.message;
+        msg.className = 'pc-msg err';
+      }
+    }
+
+    async function addProduct() {
+      const id    = document.getElementById('pId').value.trim();
+      const name  = document.getElementById('pName').value.trim();
+      const price = document.getElementById('pPrice').value.trim();
+      const stock = document.getElementById('pStock').value.trim();
+
+      if (!id)    { showMsg('formMsg', '⚠ Product ID is required', 'err'); return; }
+      if (!name)  { showMsg('formMsg', '⚠ Product Name is required', 'err'); return; }
+      if (!price) { showMsg('formMsg', '⚠ Price is required', 'err'); return; }
+
+      try {
+        const res = await fetch(PRODUCT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, name, price: Number(price), stock: Number(stock) || 0 })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        showMsg('formMsg', `✔ Product "${name}" added`, 'ok');
+        ['pId','pName','pPrice','pStock'].forEach(i => document.getElementById(i).value = '');
+        loadProducts();
+      } catch(e) {
+        showMsg('formMsg', '✕ ' + e.message, 'err');
+      }
+    }
+  </script>
+</body>
+</html>
