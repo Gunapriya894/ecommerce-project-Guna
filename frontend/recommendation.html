@@ -7,229 +7,68 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #050810;
-      --panel: #0b0f1a;
-      --panel2: #0f1420;
-      --border: #1a2540;
-      --accent: #4cc9f0;
-      --accent2: #00f5d4;
-      --accent3: #f72585;
-      --text: #c8d6f0;
-      --muted: #4a5a7a;
-      --success: #06d6a0;
-      --error: #ef233c;
+      --bg: #050810; --panel: #0b0f1a; --panel2: #0f1420;
+      --border: #1a2540; --accent: #4cc9f0; --accent2: #00f5d4;
+      --accent3: #f72585; --text: #c8d6f0; --muted: #4a5a7a;
+      --success: #06d6a0; --error: #ef233c;
     }
-
-    body {
-      background: var(--bg); color: var(--text);
-      font-family: 'Rajdhani', sans-serif; min-height: 100vh;
-      visibility: hidden;
-    }
-
-    body::before {
-      content: ''; position: fixed; inset: 0;
-      background-image:
-        linear-gradient(rgba(76,201,240,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(76,201,240,0.025) 1px, transparent 1px);
-      background-size: 48px 48px;
-      pointer-events: none; z-index: 0;
-    }
-
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 2.5rem; height: 60px;
-      background: rgba(5,8,16,0.95); backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .nav-logo {
-      font-family: 'Orbitron', monospace; font-weight: 900;
-      font-size: 0.95rem; letter-spacing: 4px; color: var(--accent2);
-      text-decoration: none;
-    }
-
+    body { background: var(--bg); color: var(--text); font-family: 'Rajdhani', sans-serif; min-height: 100vh; visibility: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(76,201,240,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(76,201,240,0.025) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; z-index: 0; }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 2.5rem; height: 60px; background: rgba(5,8,16,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+    .nav-logo { font-family: 'Orbitron', monospace; font-weight: 900; font-size: 0.95rem; letter-spacing: 4px; color: var(--accent2); text-decoration: none; }
     .nav-links { display: flex; gap: 2rem; }
-    .nav-links a {
-      font-family: 'Share Tech Mono', monospace; font-size: 0.72rem;
-      color: var(--muted); text-decoration: none;
-      letter-spacing: 2px; text-transform: uppercase; transition: color 0.2s;
-    }
+    .nav-links a { font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; color: var(--muted); text-decoration: none; letter-spacing: 2px; text-transform: uppercase; transition: color 0.2s; }
     .nav-links a:hover { color: var(--accent2); }
     .nav-links a.active { color: var(--accent); }
-
     .nav-right { display: flex; align-items: center; gap: 1rem; }
-
-    .user-chip {
-      display: flex; align-items: center; gap: 7px;
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.65rem; color: var(--muted);
-      padding: 4px 10px; border: 1px solid var(--border);
-    }
-
-    .user-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--accent); box-shadow: 0 0 6px var(--accent);
-      animation: pulse 2s ease-in-out infinite;
-    }
-
+    .user-chip { display: flex; align-items: center; gap: 7px; font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--muted); padding: 4px 10px; border: 1px solid var(--border); }
+    .user-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: pulse 2s ease-in-out infinite; }
     .user-chip #navUsername { color: var(--accent); }
-
-    .btn-logout {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.62rem; letter-spacing: 2px; text-transform: uppercase;
-      color: var(--muted); background: transparent;
-      border: 1px solid rgba(74,90,122,0.4);
-      padding: 4px 10px; cursor: pointer; transition: all 0.2s;
-    }
+    .btn-logout { font-family: 'Share Tech Mono', monospace; font-size: 0.62rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); background: transparent; border: 1px solid rgba(74,90,122,0.4); padding: 4px 10px; cursor: pointer; transition: all 0.2s; }
     .btn-logout:hover { color: var(--accent3); border-color: rgba(247,37,133,0.4); }
-
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-    .container {
-      position: relative; z-index: 1;
-      max-width: 960px; margin: 0 auto; padding: 80px 2rem 4rem;
-    }
-
-    .page-header {
-      margin-bottom: 2.5rem; padding-bottom: 1.5rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .page-eyebrow {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.65rem; letter-spacing: 3px;
-      color: var(--accent); text-transform: uppercase; margin-bottom: 0.4rem;
-    }
-
-    .page-title {
-      font-family: 'Orbitron', monospace; font-weight: 700;
-      font-size: 2rem; color: #fff; margin-bottom: 0.5rem;
-    }
-
+    .container { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 80px 2rem 4rem; }
+    .page-header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+    .page-eyebrow { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 0.4rem; }
+    .page-title { font-family: 'Orbitron', monospace; font-weight: 700; font-size: 2rem; color: #fff; margin-bottom: 0.5rem; }
     .page-subtitle { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
-
-    .input-section {
-      background: var(--panel); border: 1px solid var(--border);
-      padding: 2rem; margin-bottom: 2.5rem;
-      position: relative; overflow: hidden;
-    }
-    .input-section::before {
-      content: ''; position: absolute; top: 0; left: 0;
-      width: 100%; height: 2px;
-      background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
-    }
-
-    .input-label {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.65rem; letter-spacing: 3px;
-      color: var(--accent); text-transform: uppercase;
-      margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;
-    }
+    .input-section { background: var(--panel); border: 1px solid var(--border); padding: 2rem; margin-bottom: 2.5rem; position: relative; overflow: hidden; }
+    .input-section::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3)); }
+    .input-label { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
     .input-label::before { content: '▸'; }
-
     .input-row { display: flex; gap: 1rem; align-items: stretch; flex-wrap: wrap; }
-    .input-row input {
-      flex: 1; min-width: 240px; padding: 12px 16px;
-      background: var(--panel2); border: 1px solid var(--border);
-      color: var(--text); font-family: 'Share Tech Mono', monospace;
-      font-size: 0.9rem; outline: none; transition: border-color 0.2s;
-    }
+    .input-row input { flex: 1; min-width: 240px; padding: 12px 16px; background: var(--panel2); border: 1px solid var(--border); color: var(--text); font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
     .input-row input:focus { border-color: var(--accent); }
     .input-row input::placeholder { color: var(--muted); }
-
-    .btn {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.73rem; letter-spacing: 2px; text-transform: uppercase;
-      padding: 12px 24px; border: none; cursor: pointer;
-      transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
-      white-space: nowrap;
-    }
+    .btn { font-family: 'Share Tech Mono', monospace; font-size: 0.73rem; letter-spacing: 2px; text-transform: uppercase; padding: 12px 24px; border: none; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
     .btn-blue { background: var(--accent); color: var(--bg); }
     .btn-blue:hover { box-shadow: 0 0 24px rgba(76,201,240,0.5); transform: translateY(-1px); }
-
-    .btn-outline {
-      background: transparent; color: var(--accent);
-      border: 1px solid rgba(76,201,240,0.4);
-    }
+    .btn-outline { background: transparent; color: var(--accent); border: 1px solid rgba(76,201,240,0.4); }
     .btn-outline:hover { background: rgba(76,201,240,0.07); transform: translateY(-1px); }
-
-    /* My recs quick button */
-    .my-recs-btn {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase;
-      color: var(--accent2); background: rgba(0,245,212,0.06);
-      border: 1px solid rgba(0,245,212,0.25);
-      padding: 8px 16px; cursor: pointer; transition: all 0.15s;
-      margin-top: 0.8rem; display: inline-flex; align-items: center; gap: 6px;
-    }
+    .my-recs-btn { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--accent2); background: rgba(0,245,212,0.06); border: 1px solid rgba(0,245,212,0.25); padding: 8px 16px; cursor: pointer; transition: all 0.15s; margin-top: 0.8rem; display: inline-flex; align-items: center; gap: 6px; }
     .my-recs-btn:hover { background: rgba(0,245,212,0.12); }
-
     .hint-row { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.8rem; }
-    .hint-chip {
-      font-family: 'Share Tech Mono', monospace; font-size: 0.65rem;
-      letter-spacing: 1px; padding: 4px 12px; cursor: pointer;
-      border: 1px solid var(--border); color: var(--muted);
-      transition: all 0.15s; background: var(--panel2);
-    }
+    .hint-chip { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 1px; padding: 4px 12px; cursor: pointer; border: 1px solid var(--border); color: var(--muted); transition: all 0.15s; background: var(--panel2); }
     .hint-chip:hover { border-color: var(--accent); color: var(--accent); background: rgba(76,201,240,0.06); }
-
-    .state-box {
-      text-align: center; padding: 4rem 2rem;
-      border: 1px dashed var(--border); color: var(--muted);
-      font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; letter-spacing: 2px;
-    }
-
-    .spinner {
-      width: 36px; height: 36px; border: 2px solid var(--border);
-      border-top-color: var(--accent); border-radius: 50%;
-      animation: spin 0.7s linear infinite; margin: 0 auto 1rem;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .context-panel {
-      background: rgba(76,201,240,0.04); border: 1px solid rgba(76,201,240,0.15);
-      padding: 1.2rem 1.5rem; margin-bottom: 2rem;
-    }
-    .context-title {
-      font-family: 'Share Tech Mono', monospace; font-size: 0.65rem;
-      letter-spacing: 3px; color: var(--accent); text-transform: uppercase;
-      margin-bottom: 0.8rem; display: flex; align-items: center; gap: 8px;
-    }
+    .state-box { text-align: center; padding: 4rem 2rem; border: 1px dashed var(--border); color: var(--muted); font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; letter-spacing: 2px; }
+    .spinner { width: 36px; height: 36px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 1rem; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .context-panel { background: rgba(76,201,240,0.04); border: 1px solid rgba(76,201,240,0.15); padding: 1.2rem 1.5rem; margin-bottom: 2rem; }
+    .context-title { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 8px; }
     .context-items { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-    .ctx-tag {
-      font-family: 'Share Tech Mono', monospace; font-size: 0.72rem;
-      padding: 4px 12px; background: rgba(76,201,240,0.08);
-      border: 1px solid rgba(76,201,240,0.2); color: var(--accent2);
-    }
-
+    .ctx-tag { font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; padding: 4px 12px; background: rgba(76,201,240,0.08); border: 1px solid rgba(76,201,240,0.2); color: var(--accent2); }
     .recs-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
     .recs-title { font-family: 'Orbitron', monospace; font-weight: 700; font-size: 1.1rem; color: #fff; }
     .recs-sub { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--muted); letter-spacing: 2px; margin-top: 4px; }
-
     .rec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
-
-    .rec-card {
-      background: var(--panel); border: 1px solid var(--border);
-      padding: 1.5rem; position: relative; overflow: hidden;
-      transition: border-color 0.2s, transform 0.2s;
-      animation: fadeIn 0.4s ease forwards; opacity: 0;
-    }
-    .rec-card:nth-child(1){animation-delay:.05s}
-    .rec-card:nth-child(2){animation-delay:.12s}
-    .rec-card:nth-child(3){animation-delay:.19s}
-    .rec-card:nth-child(4){animation-delay:.26s}
-    .rec-card:nth-child(5){animation-delay:.33s}
-    .rec-card:nth-child(6){animation-delay:.4s}
-
+    .rec-card { background: var(--panel); border: 1px solid var(--border); padding: 1.5rem; position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.2s; animation: fadeIn 0.4s ease forwards; opacity: 0; }
+    .rec-card:nth-child(1){animation-delay:.05s} .rec-card:nth-child(2){animation-delay:.12s}
+    .rec-card:nth-child(3){animation-delay:.19s} .rec-card:nth-child(4){animation-delay:.26s}
+    .rec-card:nth-child(5){animation-delay:.33s} .rec-card:nth-child(6){animation-delay:.4s}
     @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
     .rec-card:hover { border-color: rgba(76,201,240,0.4); transform: translateY(-4px); }
-    .rec-card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-    }
+    .rec-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
     .rec-rank { font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 2px; margin-bottom: 0.5rem; }
     .rec-name { font-family: 'Orbitron', monospace; font-weight: 700; font-size: 0.95rem; color: #fff; margin-bottom: 0.5rem; line-height: 1.3; }
     .rec-reason { font-size: 0.82rem; color: var(--muted); line-height: 1.5; margin-bottom: 1rem; }
@@ -237,30 +76,17 @@
     .score-bar { flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
     .score-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; }
     .score-val { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--accent); min-width: 32px; text-align: right; }
-
     .history-section { margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 1.5rem; }
     .history-title { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 1rem; }
     .history-list { display: flex; flex-direction: column; gap: 0.5rem; }
-    .history-item {
-      display: flex; align-items: center; gap: 1rem;
-      font-family: 'Share Tech Mono', monospace; font-size: 0.72rem;
-      color: var(--muted); cursor: pointer; padding: 6px 10px;
-      border: 1px solid transparent; transition: all 0.15s;
-    }
+    .history-item { display: flex; align-items: center; gap: 1rem; font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; color: var(--muted); cursor: pointer; padding: 6px 10px; border: 1px solid transparent; transition: all 0.15s; }
     .history-item:hover { border-color: var(--border); color: var(--text); background: var(--panel); }
     .history-item span { color: var(--accent); }
     .history-ts { margin-left: auto; opacity: 0.5; }
-
-    .no-cart-msg {
-      font-family: 'Share Tech Mono', monospace; font-size: 0.78rem;
-      color: var(--error); background: rgba(239,35,60,0.06);
-      border: 1px solid rgba(239,35,60,0.2);
-      padding: 10px 16px; margin-top: 1rem; display: none;
-    }
+    .no-cart-msg { font-family: 'Share Tech Mono', monospace; font-size: 0.78rem; color: var(--error); background: rgba(239,35,60,0.06); border: 1px solid rgba(239,35,60,0.2); padding: 10px 16px; margin-top: 1rem; display: none; }
   </style>
 </head>
 <body>
-
   <nav>
     <a href="index.html" class="nav-logo">GU::COMMERCE</a>
     <div class="nav-links">
@@ -278,7 +104,6 @@
   </nav>
 
   <div class="container">
-
     <div class="page-header">
       <div class="page-eyebrow">SVC-003 · RECOMMENDATION ENGINE</div>
       <div class="page-title">Personalised Recommendations</div>
@@ -292,13 +117,11 @@
       <div class="input-label">Enter User ID</div>
       <div class="input-row">
         <input id="userInput" type="text" placeholder="e.g. user_42 or alice@example.com"
-          onkeydown="if(event.key==='Enter')getRecommendations()"/>
+          onkeydown="if(event.key==='Enter') getRecommendations()"/>
         <button class="btn btn-blue" onclick="getRecommendations()">✦ Get Recommendations</button>
       </div>
       <div>
-        <button class="my-recs-btn" id="myRecsBtn" onclick="getMyRecs()">
-          ◈ Get My Recommendations
-        </button>
+        <button class="my-recs-btn" onclick="getMyRecs()">◈ Get My Recommendations</button>
       </div>
       <div class="hint-row" id="hintRow"></div>
       <div class="no-cart-msg" id="noCartMsg">
@@ -317,49 +140,20 @@
       <div class="history-title">— Recent Lookups —</div>
       <div class="history-list" id="historyList"></div>
     </div>
-
   </div>
 
+  <!-- common.js provides: CART_URL, REC_URL, auth guard, doLogout(), GU_USER -->
+  <script src="common.js"></script>
   <script>
-    const CART_URL   = "https://s15c9rh1dc.execute-api.ap-southeast-1.amazonaws.com/dev/gucart";
-    const REC_URL    = "https://s15c9rh1dc.execute-api.ap-southeast-1.amazonaws.com/dev/gurecommend";
-    const AUTH_BASE  = "https://s15c9rh1dc.execute-api.ap-southeast-1.amazonaws.com/dev";
-    const LOGOUT_URL = AUTH_BASE + "/guauth/logout";
+    let lookupHistory = [];
+    let currentUser   = '';
 
-    let history = [];
-    let currentUser = '';
+    // Read logged-in user from common.js after auth guard runs
+    try {
+      currentUser = (window.GU_USER && window.GU_USER.username) ? window.GU_USER.username : '';
+    } catch (e) { console.error('Init error:', e); }
 
-    // ── Auth Guard ─────────────────────────────────────────────────────────────
-    (function authGuard() {
-      const token    = localStorage.getItem('gu_token');
-      const username = localStorage.getItem('gu_username');
-      if (!token) { window.location.href = 'login.html'; return; }
-      currentUser = username || '';
-      document.getElementById('navUsername').textContent = username || '—';
-      document.body.style.visibility = 'visible';
-    })();
-
-    async function doLogout() {
-      const token = localStorage.getItem('gu_token');
-      try {
-        await fetch(LOGOUT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
-        });
-      } catch(e) {}
-      localStorage.removeItem('gu_token');
-      localStorage.removeItem('gu_username');
-      localStorage.removeItem('gu_email');
-      window.location.href = 'login.html';
-    }
-
-    // ── Quick "My Recs" shortcut ───────────────────────────────────────────────
-    function getMyRecs() {
-      document.getElementById('userInput').value = currentUser;
-      getRecommendations();
-    }
-
-    // ── Recommendation Logic ───────────────────────────────────────────────────
+    // ── Keyword-based recommendation map ──────────────────────────────────────
     const RELATED = {
       'laptop':     ['Mouse', 'Keyboard', 'Laptop Stand', 'USB Hub', 'Monitor', 'Webcam'],
       'mouse':      ['Mouse Pad', 'Keyboard', 'USB Hub', 'Laptop Stand'],
@@ -375,35 +169,52 @@
     };
 
     function getRelated(name) {
-      const n = name.toLowerCase();
-      for (const [k, v] of Object.entries(RELATED)) {
-        if (k !== 'default' && n.includes(k)) return v;
+      try {
+        const n = (name || '').toLowerCase();
+        for (const [k, v] of Object.entries(RELATED)) {
+          if (k !== 'default' && n.includes(k)) return v;
+        }
+        return RELATED.default;
+      } catch (e) {
+        console.error('getRelated error:', e);
+        return RELATED.default;
       }
-      return RELATED.default;
     }
 
     function shuffle(arr) {
-      const a = [...arr];
-      for (let i = a.length-1; i > 0; i--) {
-        const j = Math.floor(Math.random()*(i+1));
-        [a[i],a[j]] = [a[j],a[i]];
-      }
-      return a;
+      try {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      } catch (e) { return arr; }
     }
 
+    // ── "Get My Recommendations" shortcut ─────────────────────────────────────
+    function getMyRecs() {
+      try {
+        document.getElementById('userInput').value = currentUser;
+        getRecommendations();
+      } catch (e) { console.error('getMyRecs error:', e); }
+    }
+
+    // ── Main recommendation fetch ──────────────────────────────────────────────
     async function getRecommendations() {
-      const userId = document.getElementById('userInput').value.trim();
-      const area = document.getElementById('resultsArea');
+      const area      = document.getElementById('resultsArea');
       const noCartMsg = document.getElementById('noCartMsg');
 
-      if (!userId) { document.getElementById('userInput').focus(); return; }
-
-      noCartMsg.style.display = 'none';
-      area.innerHTML = `<div class="state-box"><div class="spinner"></div>ANALYSING CART FOR ${userId.toUpperCase()}...</div>`;
-
       try {
+        const userId = document.getElementById('userInput').value.trim();
+        if (!userId) { document.getElementById('userInput').focus(); return; }
+
+        noCartMsg.style.display = 'none';
+        area.innerHTML = `<div class="state-box"><div class="spinner"></div>ANALYSING CART FOR ${userId.toUpperCase()}...</div>`;
+
+        // Step 1: Fetch all carts and find this user's cart
         const cartRes = await fetch(CART_URL);
-        if (!cartRes.ok) throw new Error(`Cart: HTTP ${cartRes.status}`);
+        if (!cartRes.ok) throw new Error(`Cart service: HTTP ${cartRes.status}`);
         const allCarts = await cartRes.json();
 
         const userCart = allCarts.find(c => c.user === userId);
@@ -415,99 +226,128 @@
 
         const cartItems = userCart.items;
 
-        // Call Lambda rec service
+        // Step 2: Call Lambda recommendation service with first cart item
         let lambdaRecs = [];
         try {
           const recRes = await fetch(REC_URL, {
-            method: 'POST',
+            method:  'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ product: cartItems[0]?.name || '' })
+            body:    JSON.stringify({ product: cartItems[0]?.name || '' })
           });
-          if (recRes.ok) lambdaRecs = (await recRes.json()).recommendations || [];
-        } catch(e) {}
+          if (recRes.ok) {
+            const recData = await recRes.json();
+            lambdaRecs = recData.recommendations || [];
+          }
+        } catch (e) {
+          // Lambda rec optional — frontend keyword map covers remaining items
+          console.warn('Lambda rec service unavailable, using local map only:', e);
+        }
 
-        // Build full rec set from all cart items
+        // Step 3: Build full rec set from all cart items using keyword map
         const recSet = new Set(lambdaRecs);
         cartItems.forEach(item => {
-          shuffle(getRelated(item.name || '')).slice(0, 3).forEach(r => recSet.add(r));
+          try {
+            shuffle(getRelated(item.name || '')).slice(0, 3).forEach(r => recSet.add(r));
+          } catch (e) { console.error('recSet build error:', e); }
         });
+
+        // Step 4: Remove items already in the cart
         cartItems.forEach(i => recSet.delete(i.name));
 
         const isMe = userId === currentUser;
 
+        // Step 5: Score and sort
         const recs = shuffle([...recSet]).slice(0, 6).map((name, idx) => {
-          const score = Math.floor(Math.random() * 30 + 65);
-          const source = cartItems.find(ci => getRelated(ci.name || '').some(r => r.toLowerCase() === name.toLowerCase()));
-          const reason = source
-            ? `Because ${isMe ? 'you have' : userId + ' has'} <strong style="color:var(--accent2)">${source.name}</strong> in cart`
-            : `Popular with ${isMe ? 'shoppers like you' : 'users like ' + userId}`;
-          return { name, score, reason };
-        }).sort((a,b) => b.score - a.score);
+          try {
+            const score  = Math.floor(Math.random() * 30 + 65);
+            const source = cartItems.find(ci =>
+              getRelated(ci.name || '').some(r => r.toLowerCase() === name.toLowerCase())
+            );
+            const reason = source
+              ? `Because ${isMe ? 'you have' : userId + ' has'} <strong style="color:var(--accent2)">${source.name}</strong> in cart`
+              : `Popular with ${isMe ? 'shoppers like you' : 'users like ' + userId}`;
+            return { name, score, reason };
+          } catch (e) { return { name, score: 65, reason: 'Recommended for you' }; }
+        }).sort((a, b) => b.score - a.score);
 
         addHistory(userId, recs.length);
         renderResults(userId, cartItems, recs, isMe);
 
-      } catch(e) {
+      } catch (e) {
         area.innerHTML = `<div class="state-box" style="color:var(--error)">ERROR: ${e.message}</div>`;
+        console.error('getRecommendations error:', e);
       }
     }
 
+    // ── Render recommendation results ──────────────────────────────────────────
     function renderResults(userId, cartItems, recs, isMe) {
-      const area = document.getElementById('resultsArea');
+      try {
+        const area = document.getElementById('resultsArea');
 
-      const cartTags = cartItems.map(i =>
-        `<span class="ctx-tag">${i.name}${i.quantity > 1 ? ' ×'+i.quantity : ''}</span>`
-      ).join('');
+        const cartTags = cartItems.map(i =>
+          `<span class="ctx-tag">${i.name}${i.quantity > 1 ? ' ×' + i.quantity : ''}</span>`
+        ).join('');
 
-      const recCards = recs.map((r, idx) => `
-        <div class="rec-card">
-          <div class="rec-rank">REC-${String(idx+1).padStart(2,'0')}</div>
-          <div class="rec-name">${r.name}</div>
-          <div class="rec-reason">${r.reason}</div>
-          <div class="rec-score">
-            <div class="score-bar"><div class="score-fill" style="width:${r.score}%"></div></div>
-            <div class="score-val">${r.score}%</div>
+        const recCards = recs.map((r, idx) => `
+          <div class="rec-card">
+            <div class="rec-rank">REC-${String(idx + 1).padStart(2, '0')}</div>
+            <div class="rec-name">${r.name}</div>
+            <div class="rec-reason">${r.reason}</div>
+            <div class="rec-score">
+              <div class="score-bar"><div class="score-fill" style="width:${r.score}%"></div></div>
+              <div class="score-val">${r.score}%</div>
+            </div>
+          </div>`
+        ).join('');
+
+        area.innerHTML = `
+          <div class="context-panel">
+            <div class="context-title">✦ Cart context for ${isMe ? 'YOU (' + userId + ')' : userId}</div>
+            <div class="context-items">${cartTags}</div>
           </div>
-        </div>
-      `).join('');
-
-      area.innerHTML = `
-        <div class="context-panel">
-          <div class="context-title">✦ Cart context for ${isMe ? 'YOU (' + userId + ')' : userId}</div>
-          <div class="context-items">${cartTags}</div>
-        </div>
-        <div class="recs-header">
-          <div>
-            <div class="recs-title">Recommended for ${isMe ? 'You' : userId}</div>
-            <div class="recs-sub">${recs.length} SUGGESTIONS · BASED ON ${cartItems.length} CART ITEM${cartItems.length!==1?'S':''}</div>
+          <div class="recs-header">
+            <div>
+              <div class="recs-title">Recommended for ${isMe ? 'You' : userId}</div>
+              <div class="recs-sub">${recs.length} SUGGESTIONS · BASED ON ${cartItems.length} CART ITEM${cartItems.length !== 1 ? 'S' : ''}</div>
+            </div>
+            <button class="btn btn-outline"
+              onclick="document.getElementById('userInput').value='${userId}';getRecommendations()">
+              ↻ Refresh
+            </button>
           </div>
-          <button class="btn btn-outline" onclick="document.getElementById('userInput').value='${userId}';getRecommendations()">
-            ↻ Refresh
-          </button>
-        </div>
-        <div class="rec-grid">${recCards}</div>
-      `;
+          <div class="rec-grid">${recCards}</div>`;
+
+      } catch (e) { console.error('renderResults error:', e); }
     }
 
+    // ── Add to recent lookups history ──────────────────────────────────────────
     function addHistory(userId, count) {
-      const now = new Date();
-      const ts = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-      history.unshift({ userId, count, ts });
-      if (history.length > 8) history.pop();
+      try {
+        const now = new Date();
+        const ts  = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        lookupHistory.unshift({ userId, count, ts });
+        if (lookupHistory.length > 8) lookupHistory.pop();
 
-      document.getElementById('historySection').style.display = 'block';
-      document.getElementById('historyList').innerHTML = history.map(h => `
-        <div class="history-item" onclick="document.getElementById('userInput').value='${h.userId}';getRecommendations()">
-          <span>${h.userId}${h.userId === currentUser ? ' (you)' : ''}</span>
-          <span style="color:var(--muted)">${h.count} recs</span>
-          <span class="history-ts">${h.ts}</span>
-        </div>
-      `).join('');
+        document.getElementById('historySection').style.display = 'block';
+        document.getElementById('historyList').innerHTML = lookupHistory.map(h => `
+          <div class="history-item"
+            onclick="document.getElementById('userInput').value='${h.userId}';getRecommendations()">
+            <span>${h.userId}${h.userId === currentUser ? ' (you)' : ''}</span>
+            <span style="color:var(--muted)">${h.count} recs</span>
+            <span class="history-ts">${h.ts}</span>
+          </div>`
+        ).join('');
 
-      const unique = [...new Set(history.map(h => h.userId))].slice(0, 4);
-      document.getElementById('hintRow').innerHTML = unique.map(u =>
-        `<span class="hint-chip" onclick="document.getElementById('userInput').value='${u}';getRecommendations()">${u}${u===currentUser?' ★':''}</span>`
-      ).join('');
+        // Update hint chips
+        const unique = [...new Set(lookupHistory.map(h => h.userId))].slice(0, 4);
+        document.getElementById('hintRow').innerHTML = unique.map(u =>
+          `<span class="hint-chip"
+            onclick="document.getElementById('userInput').value='${u}';getRecommendations()">
+            ${u}${u === currentUser ? ' ★' : ''}
+          </span>`
+        ).join('');
+
+      } catch (e) { console.error('addHistory error:', e); }
     }
   </script>
 </body>

@@ -191,3 +191,4 @@ def lambda_handler(event, context):
         return handle_logout(headers)
     else:
         return err(404, "Route not found")
+## this was my existing lambda code for auth service 
