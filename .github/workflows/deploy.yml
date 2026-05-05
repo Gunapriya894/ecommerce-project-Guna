@@ -1,0 +1,29 @@
+name: E-commerce CI (Unit Tests Only)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies (if any)
+      run: |
+        pip install -r guproduct/requirements.txt || true
+        pip install -r gucart/requirements.txt || true
+        pip install -r gurecommend/requirements.txt || true
+
+    - name: Run Unit Tests
+      run: |
+        python -m unittest discover -s tests -p "test_*.py" -v
