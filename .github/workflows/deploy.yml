@@ -1,32 +1,114 @@
-name: E-commerce CI (Unit Tests Only)
+# ── GU Commerce · CI/CD Pipeline ──────────────────────────────────────────────
+# Triggered on every push to the main branch
+# Steps: Test → Zip Lambdas → Terraform Apply
+# ──────────────────────────────────────────────────────────────────────────────
+
+name: GU Commerce Deploy Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main          # runs when you push to main branch
   pull_request:
+    branches:
+      - main          # also runs on pull requests to main (tests only)
 
 jobs:
+
+  # ── JOB 1: Run Unit Tests ───────────────────────────────────────────────────
   test:
-    runs-on: ubuntu-latest
+    name: Run Unit Tests
+    runs-on: ubuntu-latest     # GitHub provides a fresh Ubuntu machine
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
 
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
+      # Step 1: Download your code onto the GitHub machine
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Set PYTHONPATH
-      run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
+      # Step 2: Install Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-    - name: Install dependencies (if any)
-      run: |
-        pip install -r guproduct/requirements.txt || true
-        pip install -r gucart/requirements.txt || true
-        pip install -r gurecommend/requirements.txt || true
+      # Step 3: Install pytest
+      - name: Install Dependencies
+        run: pip install pytest boto3
 
-    - name: Run Unit Tests
-      run: |
-        python -m unittest discover -s tests -p "test_*.py" -v
+      # Step 4: Run all 107 tests
+      - name: Run Tests
+        run: python -m pytest tests/ -v
+
+  # ── JOB 2: Deploy to AWS (only runs if tests pass) ──────────────────────────
+  deploy:
+    name: Deploy to AWS
+    runs-on: ubuntu-latest
+    needs: test           # ONLY runs if the test job above passed
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # Only deploys on actual push to main — not on pull requests
+
+    steps:
+
+      # Step 1: Download your code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Configure AWS credentials from GitHub Secrets
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ secrets.AWS_REGION }}
+
+      # Step 3: Install Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.5.0"   # use the same version you used locally
+
+      # Step 4: Zip the guproduct Lambda
+      - name: Zip guproduct Lambda
+        run: |
+          cd guproduct
+          zip -r lambda_function.zip lambda_function.py
+          cd ..
+
+      # Step 5: Zip the gucart Lambda
+      - name: Zip gucart Lambda
+        run: |
+          cd gucart
+          zip -r lambda_function.zip lambda_function.py
+          cd ..
+
+      # Step 6: Zip the gurecommend Lambda
+      - name: Zip gurecommend Lambda
+        run: |
+          cd gurecommend
+          zip -r lambda_function.zip lambda_function.py
+          cd ..
+
+      # Step 7: Zip the gulogu (auth) Lambda
+      - name: Zip gulogu Lambda
+        run: |
+          cd gulogu
+          zip -r lambda_function.zip lambda_auth.py
+          cd ..
+
+      # Step 8: Initialise Terraform (downloads AWS provider)
+      - name: Terraform Init
+        run: terraform init
+
+      # Step 9: Check terraform files have no syntax errors
+      - name: Terraform Validate
+        run: terraform validate
+
+      # Step 10: Show what changes terraform WILL make (for logs)
+      - name: Terraform Plan
+        run: terraform plan
+
+      # Step 11: Apply the changes — update AWS Lambda functions
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        # -auto-approve skips the "yes/no" prompt — needed for automation
