@@ -66,7 +66,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "1.5.0"   # use the same version you used locally
+          terraform_version: "v1.14.7"   # use the same version you used locally
 
       # Step 4: Zip the guproduct Lambda
       - name: Zip guproduct Lambda
@@ -112,3 +112,16 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve
         # -auto-approve skips the "yes/no" prompt — needed for automation
+        # Step 12: Deploy frontend files to S3
+      - name: Deploy Frontend to S3
+        run: |
+          aws s3 sync frontend/ s3://gu-commerce-frontend-5766d0a6/ \
+            --delete \
+            --cache-control "max-age=300"
+
+      # Step 13: Invalidate CloudFront cache so users see new files immediately
+      - name: Invalidate CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id E350AOEM6ZRZKL \
+            --paths "/*"
