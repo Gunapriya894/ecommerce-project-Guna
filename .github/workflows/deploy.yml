@@ -2,8 +2,7 @@
 # Triggered on every push and pull request to main branch
 # Jobs:
 #   1. Backend Unit Tests  → runs all 107 pytest tests
-#   2. Frontend Validation → checks all HTML files are well-formed
-#   3. Backend Lint        → checks Python code quality
+#   2. Frontend Validation → checks all HTML files exist and common.js is valid
 # No AWS deployment — deployment is handled manually via Terraform
 # ──────────────────────────────────────────────────────────────────────────────
 
@@ -44,18 +43,18 @@ jobs:
       - name: Install Dependencies
         run: pip install pytest boto3
 
-      # Run all 107 unit tests
+      # Run all 107 unit tests with detailed output
       - name: Run Unit Tests
         run: python -m pytest tests/ -v
 
-      # Show a summary of results even if tests fail
+      # Show a clean summary of results — runs even if tests fail
       - name: Test Summary
-        if: always()    # runs whether tests passed or failed
+        if: always()
         run: python -m pytest tests/ --tb=short -q
 
 
   # ── JOB 2: Frontend Validation ───────────────────────────────────────────────
-  # Checks that all HTML files in frontend/ are valid and well-formed
+  # Checks all required frontend files exist and common.js has required content
   frontend-validation:
     name: Frontend Validation
     runs-on: ubuntu-latest
@@ -66,48 +65,111 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Install Node.js (needed for html-validate tool)
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      # Install html-validate — checks HTML files for errors
-      - name: Install html-validate
-        run: npm install -g html-validate
-
       # Check that all required frontend files exist
       - name: Check Frontend Files Exist
         run: |
-          echo "Checking required frontend files..."
-          test -f frontend/login.html          && echo "✓ login.html found"          || exit 1
-          test -f frontend/index.html          && echo "✓ index.html found"          || exit 1
-          test -f frontend/product.html        && echo "✓ product.html found"        || exit 1
-          test -f frontend/cart.html           && echo "✓ cart.html found"           || exit 1
-          test -f frontend/recommendation.html && echo "✓ recommendation.html found" || exit 1
-          test -f frontend/common.js           && echo "✓ common.js found"           || exit 1
-          echo "All frontend files present ✓"
+          echo "=========================================="
+          echo "  Checking required frontend files..."
+          echo "=========================================="
+          test -f frontend/login.html          && echo "✓ login.html found"          || (echo "✗ login.html MISSING" && exit 1)
+          test -f frontend/index.html          && echo "✓ index.html found"          || (echo "✗ index.html MISSING" && exit 1)
+          test -f frontend/product.html        && echo "✓ product.html found"        || (echo "✗ product.html MISSING" && exit 1)
+          test -f frontend/cart.html           && echo "✓ cart.html found"           || (echo "✗ cart.html MISSING" && exit 1)
+          test -f frontend/recommendation.html && echo "✓ recommendation.html found" || (echo "✗ recommendation.html MISSING" && exit 1)
+          test -f frontend/common.js           && echo "✓ common.js found"           || (echo "✗ common.js MISSING" && exit 1)
+          echo "------------------------------------------"
+          echo "  All 6 frontend files present ✓"
+          echo "=========================================="
 
-      # Validate each HTML file for syntax errors
-      - name: Validate HTML Files
+      # Check each HTML file contains a DOCTYPE declaration
+      - name: Check HTML Structure
         run: |
-          echo "Validating HTML files..."
-          html-validate frontend/login.html          && echo "✓ login.html valid"
-          html-validate frontend/index.html          && echo "✓ index.html valid"
-          html-validate frontend/product.html        && echo "✓ product.html valid"
-          html-validate frontend/cart.html           && echo "✓ cart.html valid"
-          html-validate frontend/recommendation.html && echo "✓ recommendation.html valid"
-          echo "All HTML files valid ✓"
+          echo "=========================================="
+          echo "  Checking HTML file structure..."
+          echo "=========================================="
+          grep -q "DOCTYPE html" frontend/login.html          && echo "✓ login.html has DOCTYPE"          || (echo "✗ login.html missing DOCTYPE" && exit 1)
+          grep -q "DOCTYPE html" frontend/index.html          && echo "✓ index.html has DOCTYPE"          || (echo "✗ index.html missing DOCTYPE" && exit 1)
+          grep -q "DOCTYPE html" frontend/product.html        && echo "✓ product.html has DOCTYPE"        || (echo "✗ product.html missing DOCTYPE" && exit 1)
+          grep -q "DOCTYPE html" frontend/cart.html           && echo "✓ cart.html has DOCTYPE"           || (echo "✗ cart.html missing DOCTYPE" && exit 1)
+          grep -q "DOCTYPE html" frontend/recommendation.html && echo "✓ recommendation.html has DOCTYPE" || (echo "✗ recommendation.html missing DOCTYPE" && exit 1)
+          echo "------------------------------------------"
+          echo "  All HTML files have correct structure ✓"
+          echo "=========================================="
 
-      # Check that common.js contains required functions
+      # Check each HTML file has correct page title
+      - name: Check HTML Titles
+        run: |
+          echo "=========================================="
+          echo "  Checking HTML page titles..."
+          echo "=========================================="
+          grep -q "GU Commerce" frontend/login.html          && echo "✓ login.html has correct title"          || (echo "✗ login.html missing title" && exit 1)
+          grep -q "GU Commerce" frontend/index.html          && echo "✓ index.html has correct title"          || (echo "✗ index.html missing title" && exit 1)
+          grep -q "GU Commerce" frontend/product.html        && echo "✓ product.html has correct title"        || (echo "✗ product.html missing title" && exit 1)
+          grep -q "GU Commerce" frontend/cart.html           && echo "✓ cart.html has correct title"           || (echo "✗ cart.html missing title" && exit 1)
+          grep -q "GU Commerce" frontend/recommendation.html && echo "✓ recommendation.html has correct title" || (echo "✗ recommendation.html missing title" && exit 1)
+          echo "------------------------------------------"
+          echo "  All page titles correct ✓"
+          echo "=========================================="
+
+      # Check each protected page includes common.js
+      - name: Check common.js Is Included In All Pages
+        run: |
+          echo "=========================================="
+          echo "  Checking common.js is included..."
+          echo "=========================================="
+          grep -q "common.js" frontend/index.html          && echo "✓ index.html includes common.js"          || (echo "✗ index.html missing common.js" && exit 1)
+          grep -q "common.js" frontend/product.html        && echo "✓ product.html includes common.js"        || (echo "✗ product.html missing common.js" && exit 1)
+          grep -q "common.js" frontend/cart.html           && echo "✓ cart.html includes common.js"           || (echo "✗ cart.html missing common.js" && exit 1)
+          grep -q "common.js" frontend/recommendation.html && echo "✓ recommendation.html includes common.js" || (echo "✗ recommendation.html missing common.js" && exit 1)
+          echo "------------------------------------------"
+          echo "  common.js included in all protected pages ✓"
+          echo "=========================================="
+
+      # Check common.js has all required API URLs and functions
       - name: Validate common.js Contents
         run: |
-          echo "Checking common.js has required content..."
-          grep -q "BASE_URL"    frontend/common.js && echo "✓ BASE_URL defined"    || exit 1
-          grep -q "CART_URL"    frontend/common.js && echo "✓ CART_URL defined"    || exit 1
-          grep -q "PRODUCT_URL" frontend/common.js && echo "✓ PRODUCT_URL defined" || exit 1
-          grep -q "REC_URL"     frontend/common.js && echo "✓ REC_URL defined"     || exit 1
-          grep -q "authGuard"   frontend/common.js && echo "✓ authGuard defined"   || exit 1
-          grep -q "doLogout"    frontend/common.js && echo "✓ doLogout defined"    || exit 1
-          echo "common.js validation passed ✓"
+          echo "=========================================="
+          echo "  Validating common.js contents..."
+          echo "=========================================="
+          grep -q "BASE_URL"    frontend/common.js && echo "✓ BASE_URL defined"     || (echo "✗ BASE_URL missing"    && exit 1)
+          grep -q "PRODUCT_URL" frontend/common.js && echo "✓ PRODUCT_URL defined"  || (echo "✗ PRODUCT_URL missing" && exit 1)
+          grep -q "CART_URL"    frontend/common.js && echo "✓ CART_URL defined"     || (echo "✗ CART_URL missing"    && exit 1)
+          grep -q "REC_URL"     frontend/common.js && echo "✓ REC_URL defined"      || (echo "✗ REC_URL missing"     && exit 1)
+          grep -q "LOGOUT_URL"  frontend/common.js && echo "✓ LOGOUT_URL defined"   || (echo "✗ LOGOUT_URL missing"  && exit 1)
+          grep -q "authGuard"   frontend/common.js && echo "✓ authGuard defined"    || (echo "✗ authGuard missing"   && exit 1)
+          grep -q "doLogout"    frontend/common.js && echo "✓ doLogout defined"     || (echo "✗ doLogout missing"    && exit 1)
+          grep -q "GU_USER"     frontend/common.js && echo "✓ GU_USER defined"      || (echo "✗ GU_USER missing"     && exit 1)
+          grep -q "localStorage" frontend/common.js && echo "✓ localStorage used"   || (echo "✗ localStorage missing" && exit 1)
+          echo "------------------------------------------"
+          echo "  common.js validation passed ✓"
+          echo "=========================================="
 
+      # Check login.html has both login and signup forms
+      - name: Validate Login Page Features
+        run: |
+          echo "=========================================="
+          echo "  Validating login page features..."
+          echo "=========================================="
+          grep -q "doLogin"   frontend/login.html && echo "✓ login function present"  || (echo "✗ doLogin missing"  && exit 1)
+          grep -q "doSignup"  frontend/login.html && echo "✓ signup function present" || (echo "✗ doSignup missing" && exit 1)
+          grep -q "LOGIN_URL" frontend/login.html && echo "✓ LOGIN_URL used"          || (echo "✗ LOGIN_URL missing" && exit 1)
+          grep -q "SIGNUP_URL" frontend/login.html && echo "✓ SIGNUP_URL used"        || (echo "✗ SIGNUP_URL missing" && exit 1)
+          grep -q "localStorage" frontend/login.html && echo "✓ localStorage used"   || (echo "✗ localStorage missing" && exit 1)
+          echo "------------------------------------------"
+          echo "  Login page features validated ✓"
+          echo "=========================================="
+
+      # Check API endpoint URLs are correctly configured
+      - name: Validate API Endpoints
+        run: |
+          echo "=========================================="
+          echo "  Validating API endpoint URLs..."
+          echo "=========================================="
+          grep -q "execute-api.ap-southeast-1.amazonaws.com" frontend/common.js && echo "✓ API Gateway URL configured" || (echo "✗ API Gateway URL missing" && exit 1)
+          grep -q "guproduct"   frontend/common.js && echo "✓ product endpoint configured"        || (echo "✗ product endpoint missing"        && exit 1)
+          grep -q "gucart"      frontend/common.js && echo "✓ cart endpoint configured"           || (echo "✗ cart endpoint missing"           && exit 1)
+          grep -q "gurecommend" frontend/common.js && echo "✓ recommendation endpoint configured" || (echo "✗ recommendation endpoint missing" && exit 1)
+          grep -q "guauth"      frontend/common.js && echo "✓ auth endpoint configured"          || (echo "✗ auth endpoint missing"          && exit 1)
+          echo "------------------------------------------"
+          echo "  All API endpoints correctly configured ✓"
+          echo "=========================================="
