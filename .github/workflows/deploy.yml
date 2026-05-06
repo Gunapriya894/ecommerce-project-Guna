@@ -1,91 +1,164 @@
-name: GU Commerce Deploy Pipeline
+# ── GU Commerce · CI Pipeline ─────────────────────────────────────────────────
+# Triggered on every push and pull request to main branch
+# Jobs:
+#   1. Backend Unit Tests  → runs all 107 pytest tests
+#   2. Frontend Validation → checks all HTML files are well-formed
+#   3. Backend Lint        → checks Python code quality
+# No AWS deployment — deployment is handled manually via Terraform
+# ──────────────────────────────────────────────────────────────────────────────
+
+name: GU Commerce CI Pipeline
 
 on:
   push:
     branches:
-      - main
+      - main          # runs on every push to main
   pull_request:
     branches:
-      - main
+      - main          # runs on every pull request to main
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # ← ADD THIS LINE — fixes Node.js warning
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # suppresses Node.js deprecation warnings
 
 jobs:
 
-  test:
-    name: Run Unit Tests
+  # ── JOB 1: Backend Unit Tests ────────────────────────────────────────────────
+  # Runs all 107 pytest tests for guproduct, gucart, gurecommend services
+  backend-tests:
+    name: Backend Unit Tests
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4   # stays same — Node24 env var above fixes warning
 
+      # Download your code onto GitHub's machine
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Install Python 3.11
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
+      # Install pytest and boto3 (needed by lambda code imports)
       - name: Install Dependencies
         run: pip install pytest boto3
 
-      - name: Run Tests
+      # Run all 107 unit tests
+      - name: Run Unit Tests
         run: python -m pytest tests/ -v
 
-  deploy:
-    name: Deploy to AWS
+      # Show a summary of results even if tests fail
+      - name: Test Summary
+        if: always()    # runs whether tests passed or failed
+        run: python -m pytest tests/ --tb=short -q
+
+
+  # ── JOB 2: Frontend Validation ───────────────────────────────────────────────
+  # Checks that all HTML files in frontend/ are valid and well-formed
+  frontend-validation:
+    name: Frontend Validation
     runs-on: ubuntu-latest
-    needs: test
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
+
+      # Download your code
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      # Install Node.js (needed for html-validate tool)
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region:            ${{ secrets.AWS_REGION }}
+          node-version: '20'
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      # Install html-validate — checks HTML files for errors
+      - name: Install html-validate
+        run: npm install -g html-validate
+
+      # Check that all required frontend files exist
+      - name: Check Frontend Files Exist
+        run: |
+          echo "Checking required frontend files..."
+          test -f frontend/login.html          && echo "✓ login.html found"          || exit 1
+          test -f frontend/index.html          && echo "✓ index.html found"          || exit 1
+          test -f frontend/product.html        && echo "✓ product.html found"        || exit 1
+          test -f frontend/cart.html           && echo "✓ cart.html found"           || exit 1
+          test -f frontend/recommendation.html && echo "✓ recommendation.html found" || exit 1
+          test -f frontend/common.js           && echo "✓ common.js found"           || exit 1
+          echo "All frontend files present ✓"
+
+      # Validate each HTML file for syntax errors
+      - name: Validate HTML Files
+        run: |
+          echo "Validating HTML files..."
+          html-validate frontend/login.html          && echo "✓ login.html valid"
+          html-validate frontend/index.html          && echo "✓ index.html valid"
+          html-validate frontend/product.html        && echo "✓ product.html valid"
+          html-validate frontend/cart.html           && echo "✓ cart.html valid"
+          html-validate frontend/recommendation.html && echo "✓ recommendation.html valid"
+          echo "All HTML files valid ✓"
+
+      # Check that common.js contains required functions
+      - name: Validate common.js Contents
+        run: |
+          echo "Checking common.js has required content..."
+          grep -q "BASE_URL"    frontend/common.js && echo "✓ BASE_URL defined"    || exit 1
+          grep -q "CART_URL"    frontend/common.js && echo "✓ CART_URL defined"    || exit 1
+          grep -q "PRODUCT_URL" frontend/common.js && echo "✓ PRODUCT_URL defined" || exit 1
+          grep -q "REC_URL"     frontend/common.js && echo "✓ REC_URL defined"     || exit 1
+          grep -q "authGuard"   frontend/common.js && echo "✓ authGuard defined"   || exit 1
+          grep -q "doLogout"    frontend/common.js && echo "✓ doLogout defined"    || exit 1
+          echo "common.js validation passed ✓"
+
+
+  # ── JOB 3: Backend Code Quality ──────────────────────────────────────────────
+  # Checks Python lambda files for syntax errors and basic code quality
+  backend-lint:
+    name: Backend Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # Download your code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Install Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          terraform_version: "1.6.3"   # ← your version
+          python-version: '3.11'
 
-      - name: Zip guproduct Lambda
-        run: cd guproduct && zip -r lambda_function.zip lambda_function.py
+      # Install flake8 — Python code quality checker
+      - name: Install Linting Tools
+        run: pip install flake8 boto3
 
-      - name: Zip gucart Lambda
-        run: cd gucart && zip -r lambda_function.zip lambda_function.py
-
-      - name: Zip gurecommend Lambda
-        run: cd gurecommend && zip -r lambda_function.zip lambda_function.py
-
-      - name: Zip gulogu Lambda
-        run: cd gulogu && zip -r lambda_function.zip lambda_auth.py
-
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Validate
-        run: terraform validate
-
-      - name: Terraform Plan
-        run: terraform plan
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
-
-      - name: Deploy Frontend to S3
+      # Check all lambda files exist
+      - name: Check Lambda Files Exist
         run: |
-          aws s3 sync frontend/ s3://gu-commerce-frontend-5766d0a6/ \
-            --delete \
-            --cache-control "max-age=300"
+          echo "Checking lambda files..."
+          test -f guproduct/lambda_function.py  && echo "✓ guproduct lambda found"  || exit 1
+          test -f gucart/lambda_function.py     && echo "✓ gucart lambda found"     || exit 1
+          test -f gurecommend/lambda_function.py && echo "✓ gurecommend lambda found" || exit 1
+          test -f gulogu/lambda_auth.py         && echo "✓ gulogu lambda found"     || exit 1
+          echo "All lambda files present ✓"
 
-      - name: Invalidate CloudFront Cache
+      # Check Python syntax — catches crash-causing errors
+      - name: Check Python Syntax
         run: |
-          aws cloudfront create-invalidation \
-            --distribution-id E350AOEM6ZRZKL \
-            --paths "/*"
+          echo "Checking Python syntax..."
+          python -m py_compile guproduct/lambda_function.py   && echo "✓ guproduct syntax OK"
+          python -m py_compile gucart/lambda_function.py      && echo "✓ gucart syntax OK"
+          python -m py_compile gurecommend/lambda_function.py && echo "✓ gurecommend syntax OK"
+          python -m py_compile gulogu/lambda_auth.py          && echo "✓ gulogu syntax OK"
+          echo "All Python files syntax valid ✓"
+
+      # Run flake8 — checks code style (max line length 120, ignore some warnings)
+      - name: Run Code Quality Check
+        run: |
+          flake8 guproduct/lambda_function.py   --max-line-length=120 --ignore=E501,W503
+          flake8 gucart/lambda_function.py      --max-line-length=120 --ignore=E501,W503
+          flake8 gurecommend/lambda_function.py --max-line-length=120 --ignore=E501,W503
+          flake8 gulogu/lambda_auth.py          --max-line-length=120 --ignore=E501,W503
+          echo "Code quality check passed ✓"
