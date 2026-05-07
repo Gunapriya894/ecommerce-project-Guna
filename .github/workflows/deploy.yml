@@ -1,8 +1,9 @@
 # ── GU Commerce · CI Pipeline ─────────────────────────────────────────────────
 # Triggered on every push and pull request to main branch
 # Jobs:
-#   1. Backend Unit Tests  → runs all 107 pytest tests
-#   2. Frontend Validation → checks all HTML files exist and common.js is valid
+#   1. Backend Unit Tests    → runs all 107 pytest tests
+#   2. Frontend Validation   → checks all HTML files exist and common.js is valid
+#   3. Backend Code Quality  → checks lambda files exist, syntax, and code style
 # No AWS deployment — deployment is handled manually via Terraform
 # ──────────────────────────────────────────────────────────────────────────────
 
@@ -131,15 +132,15 @@ jobs:
           echo "=========================================="
           echo "  Validating common.js contents..."
           echo "=========================================="
-          grep -q "BASE_URL"    frontend/common.js && echo "✓ BASE_URL defined"     || (echo "✗ BASE_URL missing"    && exit 1)
-          grep -q "PRODUCT_URL" frontend/common.js && echo "✓ PRODUCT_URL defined"  || (echo "✗ PRODUCT_URL missing" && exit 1)
-          grep -q "CART_URL"    frontend/common.js && echo "✓ CART_URL defined"     || (echo "✗ CART_URL missing"    && exit 1)
-          grep -q "REC_URL"     frontend/common.js && echo "✓ REC_URL defined"      || (echo "✗ REC_URL missing"     && exit 1)
-          grep -q "LOGOUT_URL"  frontend/common.js && echo "✓ LOGOUT_URL defined"   || (echo "✗ LOGOUT_URL missing"  && exit 1)
-          grep -q "authGuard"   frontend/common.js && echo "✓ authGuard defined"    || (echo "✗ authGuard missing"   && exit 1)
-          grep -q "doLogout"    frontend/common.js && echo "✓ doLogout defined"     || (echo "✗ doLogout missing"    && exit 1)
-          grep -q "GU_USER"     frontend/common.js && echo "✓ GU_USER defined"      || (echo "✗ GU_USER missing"     && exit 1)
-          grep -q "localStorage" frontend/common.js && echo "✓ localStorage used"   || (echo "✗ localStorage missing" && exit 1)
+          grep -q "BASE_URL"     frontend/common.js && echo "✓ BASE_URL defined"     || (echo "✗ BASE_URL missing"     && exit 1)
+          grep -q "PRODUCT_URL"  frontend/common.js && echo "✓ PRODUCT_URL defined"  || (echo "✗ PRODUCT_URL missing"  && exit 1)
+          grep -q "CART_URL"     frontend/common.js && echo "✓ CART_URL defined"     || (echo "✗ CART_URL missing"     && exit 1)
+          grep -q "REC_URL"      frontend/common.js && echo "✓ REC_URL defined"      || (echo "✗ REC_URL missing"      && exit 1)
+          grep -q "LOGOUT_URL"   frontend/common.js && echo "✓ LOGOUT_URL defined"   || (echo "✗ LOGOUT_URL missing"   && exit 1)
+          grep -q "authGuard"    frontend/common.js && echo "✓ authGuard defined"    || (echo "✗ authGuard missing"    && exit 1)
+          grep -q "doLogout"     frontend/common.js && echo "✓ doLogout defined"     || (echo "✗ doLogout missing"     && exit 1)
+          grep -q "GU_USER"      frontend/common.js && echo "✓ GU_USER defined"      || (echo "✗ GU_USER missing"      && exit 1)
+          grep -q "localStorage" frontend/common.js && echo "✓ localStorage used"    || (echo "✗ localStorage missing" && exit 1)
           echo "------------------------------------------"
           echo "  common.js validation passed ✓"
           echo "=========================================="
@@ -150,11 +151,11 @@ jobs:
           echo "=========================================="
           echo "  Validating login page features..."
           echo "=========================================="
-          grep -q "doLogin"   frontend/login.html && echo "✓ login function present"  || (echo "✗ doLogin missing"  && exit 1)
-          grep -q "doSignup"  frontend/login.html && echo "✓ signup function present" || (echo "✗ doSignup missing" && exit 1)
-          grep -q "LOGIN_URL" frontend/login.html && echo "✓ LOGIN_URL used"          || (echo "✗ LOGIN_URL missing" && exit 1)
-          grep -q "SIGNUP_URL" frontend/login.html && echo "✓ SIGNUP_URL used"        || (echo "✗ SIGNUP_URL missing" && exit 1)
-          grep -q "localStorage" frontend/login.html && echo "✓ localStorage used"   || (echo "✗ localStorage missing" && exit 1)
+          grep -q "doLogin"    frontend/login.html && echo "✓ login function present"  || (echo "✗ doLogin missing"   && exit 1)
+          grep -q "doSignup"   frontend/login.html && echo "✓ signup function present" || (echo "✗ doSignup missing"  && exit 1)
+          grep -q "LOGIN_URL"  frontend/login.html && echo "✓ LOGIN_URL used"          || (echo "✗ LOGIN_URL missing"  && exit 1)
+          grep -q "SIGNUP_URL" frontend/login.html && echo "✓ SIGNUP_URL used"         || (echo "✗ SIGNUP_URL missing" && exit 1)
+          grep -q "localStorage" frontend/login.html && echo "✓ localStorage used"    || (echo "✗ localStorage missing" && exit 1)
           echo "------------------------------------------"
           echo "  Login page features validated ✓"
           echo "=========================================="
@@ -169,7 +170,72 @@ jobs:
           grep -q "guproduct"   frontend/common.js && echo "✓ product endpoint configured"        || (echo "✗ product endpoint missing"        && exit 1)
           grep -q "gucart"      frontend/common.js && echo "✓ cart endpoint configured"           || (echo "✗ cart endpoint missing"           && exit 1)
           grep -q "gurecommend" frontend/common.js && echo "✓ recommendation endpoint configured" || (echo "✗ recommendation endpoint missing" && exit 1)
-          grep -q "guauth"      frontend/common.js && echo "✓ auth endpoint configured"          || (echo "✗ auth endpoint missing"          && exit 1)
+          grep -q "guauth"      frontend/common.js && echo "✓ auth endpoint configured"           || (echo "✗ auth endpoint missing"           && exit 1)
           echo "------------------------------------------"
           echo "  All API endpoints correctly configured ✓"
+          echo "=========================================="
+
+
+  # ── JOB 3: Backend Code Quality ──────────────────────────────────────────────
+  # Checks all 4 lambda files exist, Python syntax is valid, and code style passes
+  backend-code-quality:
+    name: Backend Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # Download your code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Install Python 3.11
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # Install flake8 and boto3
+      - name: Install Tools
+        run: pip install flake8 boto3
+
+      # Check all 4 lambda files exist
+      - name: Check Lambda Files Exist
+        run: |
+          echo "=========================================="
+          echo "  Checking lambda files..."
+          echo "=========================================="
+          test -f guproduct/lambda_function.py   && echo "✓ guproduct lambda found"   || (echo "✗ guproduct lambda MISSING"   && exit 1)
+          test -f gucart/lambda_function.py      && echo "✓ gucart lambda found"      || (echo "✗ gucart lambda MISSING"      && exit 1)
+          test -f gurecommend/lambda_function.py && echo "✓ gurecommend lambda found" || (echo "✗ gurecommend lambda MISSING" && exit 1)
+          test -f gulogu/lambda_auth.py          && echo "✓ gulogu lambda found"      || (echo "✗ gulogu lambda MISSING"      && exit 1)
+          echo "------------------------------------------"
+          echo "  All 4 lambda files present ✓"
+          echo "=========================================="
+
+      # python -m py_compile catches syntax errors that would crash the Lambda
+      - name: Check Python Syntax
+        run: |
+          echo "=========================================="
+          echo "  Checking Python syntax..."
+          echo "=========================================="
+          python -m py_compile guproduct/lambda_function.py   && echo "✓ guproduct syntax OK"   || (echo "✗ guproduct has syntax error"   && exit 1)
+          python -m py_compile gucart/lambda_function.py      && echo "✓ gucart syntax OK"      || (echo "✗ gucart has syntax error"      && exit 1)
+          python -m py_compile gurecommend/lambda_function.py && echo "✓ gurecommend syntax OK" || (echo "✗ gurecommend has syntax error" && exit 1)
+          python -m py_compile gulogu/lambda_auth.py          && echo "✓ gulogu syntax OK"      || (echo "✗ gulogu has syntax error"      && exit 1)
+          echo "------------------------------------------"
+          echo "  All Python files syntax valid ✓"
+          echo "=========================================="
+
+      # flake8 checks code style — max line length 120, common warnings ignored
+      - name: Run Code Quality Check (flake8)
+        run: |
+          echo "=========================================="
+          echo "  Running flake8 code quality check..."
+          echo "=========================================="
+          flake8 guproduct/lambda_function.py   --max-line-length=120 --ignore=E501,W503 && echo "✓ guproduct code quality OK"
+          flake8 gucart/lambda_function.py      --max-line-length=120 --ignore=E501,W503 && echo "✓ gucart code quality OK"
+          flake8 gurecommend/lambda_function.py --max-line-length=120 --ignore=E501,W503 && echo "✓ gurecommend code quality OK"
+          flake8 gulogu/lambda_auth.py          --max-line-length=120 --ignore=E501,W503 && echo "✓ gulogu code quality OK"
+          echo "------------------------------------------"
+          echo "  All lambda files passed code quality check ✓"
           echo "=========================================="
