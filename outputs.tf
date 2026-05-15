@@ -46,3 +46,4 @@ output "cloudfront_distribution_id" {
   description = "Use this to invalidate cache after re-uploading files"
   value       = aws_cloudfront_distribution.frontend.id
 }
+

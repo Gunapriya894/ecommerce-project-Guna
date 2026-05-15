@@ -9,3 +9,4 @@ provider "aws" {
   region  = "us-east-1"
   profile = "idp-sbx-trn-lab-01"
 }
+

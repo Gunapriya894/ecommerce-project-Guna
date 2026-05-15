@@ -69,3 +69,4 @@ async function doLogout() {
         window.location.replace('login.html');
     }
 }
+

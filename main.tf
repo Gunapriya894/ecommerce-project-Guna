@@ -432,3 +432,4 @@ resource "aws_dynamodb_table" "recommend" {
     type = "S"
   }
 }
+

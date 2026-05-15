@@ -6,3 +6,4 @@ variable "source_path" {}
 # DynamoDB
 variable "table_name" {}
 variable "table_arn" {}
+

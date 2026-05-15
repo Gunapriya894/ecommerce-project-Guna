@@ -7,7 +7,7 @@
 # ── S3 Bucket ─────────────────────────────────────────────────────────────────
 
 resource "aws_s3_bucket" "frontend" {
-  bucket        = "gu-commerce-frontend-${random_id.suffix.hex}"
+  bucket        = "gu-commerce-frontend-5766d0a6"
   force_destroy = true
 }
 

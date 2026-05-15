@@ -15,6 +15,11 @@ terraform.tfstate
 terraform.tfstate.backup
 terraform.tfstate.d/
 
+# Terraform numbered backup files (created during imports and apply)
+terraform.tfstate.*.backup
+*.tfstate
+*.tfstate.*
+
 # Terraform plan output files
 *.tfplan
 *.tfplan.json
@@ -71,6 +76,7 @@ build/
 # pytest cache
 .pytest_cache/
 .cache/
+v/
 
 # Coverage reports
 .coverage
@@ -154,7 +160,11 @@ node_modules/
 npm-debug.log*
 
 
-# ── Misc ──────────────────────────────────────────────────────────────────────
+# ── Temp / Debug files ────────────────────────────────────────────────────────
+
+# Temp files created during debugging sessions
+resources.json
+CACHEDIR.TAG
 
 # Backup files
 *.bak
